@@ -1,0 +1,81 @@
+
+add users to _svn group
+
+mkdir -P /usr/local/svn/repository
+svnadmin create /usr/local/svn/repository/config
+svnadmin create /usr/local/svn/repository/bin
+svnadmin create /usr/local/svn/repository/resume
+svnadmin create /usr/local/svn/repository/tiles
+svnadmin create /usr/local/svn/repository/lbn-tools
+svnadmin create /usr/local/svn/repository/org
+
+chown -R _svn:_svn /usr/local/svn/repository
+chmod -R g+rw /usr/local/svn/repository
+
+modify {repo}/db : chmod g+s /usr/local/svn/repository/{repo}/db
+
+modify {repo}/conf/svnserve.conf
+  anon-access = read
+  auth-access = write
+  password-db = /usr/local/svn/passwd
+  realm = Middle Earth Subversion Realm
+
+create /usr/local/bin/svn and /usr/local/bin/svnserve scripts that set umask to 002
+
+
+setup staging @ ~/tmp/stage/{repo}/trunk tags branches
+load files in trunk:
+svn import {repo} file:///usr/local/svn/repository/{repo}/trunk
+
+chown _svn:_svn /usr/local/svn/repository/{repo}/db/rep-cache.db
+chmod g+w /usr/local/svn/repository/{repo}/db/rep-cache.db
+
+copy ~/config org.tigris.subversion.svnserve.plist to /Library/LaunchDaemons/
+
+Checkout:
+on the svn host - svn co file:///usr/local/svn/repository/{repo}/trunk {repo}
+on another hot  - svn co svn://strider/{repo}/trunk {repo}
+ 
+modify ~/.subversion/config:
+       global-ignores add *.class .deps stamp-h1 autom4te.cache configure aclocal.m4
+
+       diff-cmd = meld 
+
+       [auto-props]
+       *.c = svn:eol-style=native
+       *.cpp = svn:eol-style=native
+       *.cs = svn:eol-style=native
+       *.h = svn:eol-style=native
+       *.H = svn:eol-style=native
+       *.i = svn:eol-style=native
+       *.tcl = svn:eol-style=native
+       *.java = svn:eol-style=native
+       *.xml = svn:eol-style=native
+       *.build = svn:eol-style=native
+       *.sh = svn:eol-style=native;svn:executable
+       *.txt = svn:eol-style=native
+       *.png = svn:mime-type=image/png
+       *.jpg = svn:mime-type=image/jpeg
+       Makefile = svn:eol-style=native
+       Makefile.am = svn:eol-style=native
+       *.m4 = svn:eol-style=LF
+       *.el = svn:eol-style=LF
+       AUTHORS = svn:eol-style=native
+       ChangeLog = svn:eol-style=native
+       INSTALL = svn:eol-style=native
+       NEWS = svn:eol-style=native
+       README = svn:eol-style=native
+       configure.ac = svn:eol-style=LF
+
+
+
+Migration:
+ svnadmin dump /usr/local/svn/repository/{repo} > dumpfile
+
+ svnadmin load /usr/local/svn/repository/{repo} < dumpfile
+
+Pretty svn diff:
+  svn diff <file> --diff-cmd meld
+  or
+  (g)vimdiff <(svn cat <file>) <file>
+

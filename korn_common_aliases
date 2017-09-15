@@ -1,0 +1,52 @@
+###############################################################################
+# 
+# korn-common-aliases
+#
+###############################################################################
+
+#------------------------------------------------------------------------------
+# Emulate ms-dos path command
+#------------------------------------------------------------------------------
+alias path='echo $PATH'         # ms-dos path command
+alias cls=clear
+
+#------------------------------------------------------------------------------
+# Alias shortcuts for ls
+#
+# Linux and Cygwin use GNU ls which has --color=auto
+# darwin, BSDs, and Sun do not
+#------------------------------------------------------------------------------
+case $(uname) in
+  Linux*) alias ls='ls -F --color=auto';;  # Use colors
+  CYGWIN*) alias ls='ls -F --color=auto';; # Use colors
+  MINGW*) alias ls='ls -F --color=auto';;  # Use colors
+  *) alias ls='ls -F';;
+esac
+
+alias l='ls -CF'                         # shorthand for list
+alias ll='ls -lh'                        # shorthand for long list
+
+if [ -x /usr/bin/d ]
+then
+  alias lsd='d'
+else
+  alias lsd='ls -ldh'
+fi
+
+alias du='du -h'
+alias df='df -h'
+alias hup='kill -HUP'
+
+alias cgrep='grep --color=auto'
+alias cfgrep='fgrep --color=auto'
+alias cegrep='egrep --color=auto'
+
+case $(uname) in
+  Darwin*) alias top='top -o cpu';;         # Sort top display by cpu usage
+  *[bB][sS][dD]*) alias top='top -o cpu';;  # Sort top display by cpu usage
+esac
+
+###############################################################################
+# end of korn_common_aliases
+###############################################################################
+

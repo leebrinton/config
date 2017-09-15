@@ -1,0 +1,1074 @@
+
+##############################################################################
+#
+# bourne_common_startup
+#
+# This file contains startup commands common to all
+# Bourne shell derived interactive shellls including:
+#	Bourne shell, Korn shell and Bash.
+#
+###############################################################################
+
+#******************************************************************************
+# System stuff
+#******************************************************************************
+#------------------------------------------------------------------------------
+# Set the shell process's file creation mask
+#------------------------------------------------------------------------------
+umask 022
+
+#---------------------------------------------------------------------------
+# Set the RUNNING_CYGWIN, RUNNING_MINGW,
+# and RUNNING_DARWIN environment variables.
+#---------------------------------------------------------------------------
+RUNNING_CYGWIN=false
+RUNNING_MINGW=false
+RUNNING_DARWIN=false
+
+case `uname` in
+  CYGWIN*)
+    RUNNING_CYGWIN=true;;
+  MINGW*)
+    RUNNING_MINGW=true;;
+  Darwin*)
+    RUNNING_DARWIN=true;;
+esac
+export RUNNING_CYGWIN RUNNING_MINGW RUNNING_DARWIN
+
+#---------------------------------------------------------------------------
+# Set the PRINTER environment variable.
+#---------------------------------------------------------------------------
+if [ "$RUNNING_CYGWIN" = 'true' ]
+then
+    PRINTER='\\APOLLO\Dev'
+    export PRINTER
+fi
+
+#---------------------------------------------------------------------------
+# Set the HOSTNAME environment variable.
+#---------------------------------------------------------------------------
+if [ -z "${HOSTNAME}" ]
+then
+    export HOSTNAME=`hostname`
+fi
+
+#------------------------------------------------------------------------------
+# Set the temporary directory
+#
+# If /tmp exists and is a directory
+#	Set TMP to /tmp
+#------------------------------------------------------------------------------
+if [ -d /tmp ]
+then
+    export TMP=/tmp
+fi
+
+#------------------------------------------------------------------------------
+# Set the JAVA_HOME environment variable.
+# Everything java depends on this.
+#------------------------------------------------------------------------------
+if [ "$RUNNING_CYGWIN" = 'true' ]
+then
+    if [ -d '/cygdrive/c/Program Files/Java/jdk1.7.0_51' ]
+    then
+        export JAVA_VERSION='1.7.0_51'
+	export JAVA_HOME=`cygpath --mixed "/cygdrive/c/Program Files/Java/jdk${JAVA_VERSION}"`
+    fi
+elif [ "$RUNNING_MINGW" = 'true' ]
+then
+    if [ -d '/c/Program Files/Java/jdk1.7.0_51' ]
+    then
+        export JAVA_VERSION='1.6.0_29'
+        export JAVA_HOME="C:/Program Files/Java/jdk${JAVA_VERSION}"
+    fi
+elif [ "$RUNNING_DARWIN" = 'true' ]
+then
+    if [ -d /Library/Java/JavaVirtualMachines ]
+    then
+        all_vm_list='jdk1.8.0_45.jdk/Contents/Home'
+        for vm in $all_vm_list
+        do
+        p="/Library/Java/JavaVirtualMachines/${vm}"
+        if [ -d "${p}" ]
+        then
+            JAVA_HOME="${p}"
+        fi
+        done
+        unset all_vm_list p
+    elif [ -d /Library/Java/Home ]
+    then
+        JAVA_HOME='/Library/Java/Home'
+    fi
+
+    if [ -n JAVA_HOME ]
+    then
+        export JAVA_HOME
+    fi
+elif [ -d '/usr/lib/jvm/java-6-openjdk' ]
+then
+    export JAVA_VERSION='1.6.0'
+    export JAVA_HOME='/usr/lib/jvm/java-6-openjdk'
+fi
+
+#------------------------------------------------------------------------------
+# Set the CATALINA_HOME environment variable
+#------------------------------------------------------------------------------
+tomcat_version=6.0.37
+
+if [ -d "/usr/local/apache-tomcat-$tomcat_version" ]
+then
+    
+    if [ "$RUNNING_CYGWIN" = 'true' ]
+    then
+        CATALINA_HOME=`cygpath -w /usr/local/apache-tomcat-$tomcat_version`
+    else
+        CATALINA_HOME="/usr/local/apache-tomcat-$tomcat_version"
+    fi
+    export CATALINA_HOME
+fi
+unset tomcat_version
+
+#------------------------------------------------------------------------------
+# Set the M2_HOME environment variable. (Maven 2)
+#------------------------------------------------------------------------------
+m2_version=2.0.4
+
+if [ -d "/usr/local/maven-${m2_version}" ]
+then
+    
+    if [ "$RUNNING_CYGWIN" = 'true' ]
+    then
+        M2_HOME=`cygpath -w /usr/local/maven-${m2_version}`
+    else
+        M2_HOME="/usr/local/maven-${m2_version}"
+    fi
+    export M2_HOME
+fi
+unset m2_version
+
+#---------------------------------------------------------------------------
+# Set the FOP_HOME environment variable.
+#---------------------------------------------------------------------------
+fop_version='0.20.5'
+
+if [ -d "/usr/local/fop-${fop_version}" ]
+then
+    if [ "$RUNNING_CYGWIN" = true ]
+    then
+        FOP_HOME=$(cygpath -w /usr/local/fop-${fop_version})
+    else
+        FOP_HOME="/usr/local/fop-${fop_version}"
+    fi
+    export FOP_HOME
+fi
+unset fop_version
+
+#------------------------------------------------------------------------------
+# Set PERL5LIB - A colon separated list of directories to search for perl 5
+# libraries/
+#------------------------------------------------------------------------------
+if [ -d "$HOME/perl5" ]
+then 
+  PERL_LOCAL_LIB_ROOT="${HOME}/perl5${PERL_LOCAL_LIB_ROOT+:}${PERL_LOCAL_LIB_ROOT}"
+  export PERL_LOCAL_LIB_ROOT
+
+
+  PERL5LIB="${PERL_LOCAL_LIB_ROOT}/lib/perl5${PERL5LIB+:}${PERL5LIB}"
+  export PERL5LIB
+
+  PERL_MB_OPT="--install_base \"${PERL_LOCAL_LIB_ROOT}\""
+  export PERL_MB_OPT
+
+  PERL_MM_OPT="INSTALL_BASE=${PERL_LOCAL_LIB_ROOT}"
+  export PERL_MM_OPT
+fi
+
+#---------------------------------------------------------------------------
+# Set the JETTY_HOME environment variable.
+#---------------------------------------------------------------------------
+jetty_version='5.1.10'
+
+if [ -d "/usr/local/jetty-${jetty_version}" ]
+then
+    if [ "$RUNNING_CYGWIN" = true ]
+    then
+        JETTY_HOME=$(cygpath -w /usr/local/jetty-${jetty_version})
+    else
+        JETTY_HOME="/usr/local/jetty-${jetty_version}"
+    fi
+    export JETTY_HOME
+elif [ -d "/opt/local/share/java/jetty-${jetty_version}" ]
+then
+    export JETTY_HOME="/opt/local/share/java/jetty-${jetty-version}"
+fi
+unset jetty_version
+
+#------------------------------------------------------------------------------
+# Set the GROOVY_HOME environment variable.
+#------------------------------------------------------------------------------
+groovy_version=1.0-beta-10
+
+if [ -d "/usr/local/groovy-$groovy_version" ]
+then
+    
+    if [ "$RUNNING_CYGWIN" = 'true' ]
+    then
+        GROOVY_HOME=`cygpath -w /usr/local/groovy-$groovy_version`
+    else
+        GROOVY_HOME="/usr/local/groovy-$groovy_version"
+    fi
+    export GROOVY_HOME
+fi
+unset groovy_version
+
+#------------------------------------------------------------------------------
+# Set the ORACLE_HOME environment variable
+#------------------------------------------------------------------------------
+if [ -z "$ORACLE_HOME" ]
+then
+    oracle_version='11_2'
+    if [ "$RUNNING_CYGWIN" = 'true' ]
+    then
+        if [ -d `cygpath -u c:/instantclient_$oracle_version` ]
+        then
+            export ORACLE_HOME="c:\\instantclient_$oracle_version"
+        fi
+    elif [ "$RUNNING_MINGW" = 'true' ]
+    then
+        if [ -d /c/instantclient_$oracle_version ]
+        then
+            export ORACLE_HOME="C:\\instantclient_$oracle_version"
+        fi
+    elif [ -d /usr/local/instantclient_$oracle_version ]
+    then
+        export ORACLE_HOME="/usr/local/instantclient_$oracle_version"
+    fi
+    unset oracle_version
+fi
+
+if [ -e ${HOME}/config/ora_config ]
+then
+  . ${HOME}/config/ora_config
+fi
+
+#------------------------------------------------------------------------------
+# Set the GOROOT and GOPATH environment variable
+#------------------------------------------------------------------------------
+if [ -d '/opt/local/go' ]
+then
+    export GOROOT='/opt/local/go'
+fi
+
+if [ -d "${HOME}/go" ]
+then
+    if [ "RUNNING_MINGW" = 'true' ]
+    then
+        export GOPATH='C:\\MinGW\\msys\\1.0\\home\\lbrinton\\go'
+    else
+        export GOPATH="${HOME}/go"
+    fi
+fi
+
+#------------------------------------------------------------------------------
+# Set the PATH environment variable.
+# Colon separated list of directories in which the shell looks for commands
+#------------------------------------------------------------------------------
+#
+# Initialize variables
+#
+if [ -x /usr/bin/whoami ]
+then
+  SELF=`whoami`
+else
+  SELF=${LOGNAME}
+fi
+
+unset PATH
+
+#
+# If user is root 
+#
+if [ $SELF == 'root' ]
+then
+all_paths="\
+/usr/local/bin
+/usr/local/sbin
+/sbin
+/bin
+/usr/sbin
+/usr/bin
+/usr/bin/X11
+/usr/X11R6/bin"
+elif [ "$RUNNING_DARWIN" = 'true' ]
+then
+all_paths="\
+/usr/local/sbin
+/usr/local/bin
+/opt/local/bin
+/opt/local/sbin
+/sw/sbin
+/sw/bin
+/sbin
+/bin
+/usr/sbin
+/usr/bin
+/usr/bin/X11
+/usr/X11R6/bin
+/Developer/Tools
+/Developer/Applications/Utilities
+/usr/local/mysql/bin
+."
+else
+all_paths="\
+/usr/local/bin
+/usr/bin
+/bin
+/mingw/bin
+/usr/bin/X11
+/usr/X11R6/bin
+/usr/local/TeX/bin/win32
+/usr/games
+."
+fi
+
+for p in $all_paths
+do
+  if [ -d "${p}" ]
+  then
+    PATH="$PATH${PATH+:}${p}"
+  fi
+done
+unset all_paths
+
+#
+# If ${HOME}/bin exists add it to the path
+#
+if [ -n "${HOME}" ]
+then
+    PATH="${HOME}/bin${PATH+:}$PATH"
+fi
+
+#
+# If JAVA_HOME is set add the java bin dir to the path
+#
+if [ -n "$JAVA_HOME" ]
+then
+  if [ "$RUNNING_CYGWIN" = 'true' ]
+  then
+    PATH=$PATH${PATH+:}`cygpath -u "$JAVA_HOME/bin"`
+  elif [ "$RUNNING_MINGW" = 'true' ]
+  then
+    PATH=$PATH${PATH+:}"/c/Program Files/Java/jdk${JAVA_VERSION}/bin"
+  else
+    PATH=$PATH${PATH+:}$JAVA_HOME/bin
+  fi
+fi
+
+#
+# if ANT_HOME/bin exists add it
+#
+all_ant_versions="
+1.10.1
+1.9.4
+1.8.2"
+ant_version='1.8.2'
+
+for ant_version in $all_ant_versions
+do
+  if [ -d "/usr/local/apache-ant-${ant_version}" ]
+  then
+    PATH=$PATH${PATH+:}/usr/local/apache-ant-${ant_version}/bin
+  elif [ -d "/c/cygwin/usr/local/apache-ant-${ant_version}/bin" ]
+  then
+    PATH=$PATH${PATH+:}/c/cygwin/usr/local/apache-ant-${ant_version}/bin
+  fi
+done
+unset ant_version all_ant_versions
+
+
+#
+# if M2_HOME/bin exists add it
+#
+if [ -n "$M2_HOME" -a -d "$M2_HOME/bin" ]
+then
+    if [ "$RUNNING_CYGWIN" = 'true' ]
+    then
+        PATH=$PATH${PATH+:}`cygpath -u $M2_HOME/bin`
+    else
+        PATH=$PATH${PATH+:}$M2_HOME/bin
+    fi
+fi
+
+#
+# if FOP_HOME exists add it
+#
+if [ -n "$FOP_HOME" -a -d "$FOP_HOME" ]
+then
+    if [ "$RUNNING_CYGWIN" = 'true' ]
+    then
+        PATH=$PATH${PATH+:}`cygpath -u ${FOP_HOME}`
+    else
+        PATH=$PATH${PATH+:}${FOP_HOME}
+    fi
+fi
+
+#
+# if GROOVY_HOME/bin exists add it
+#
+if [ -n "$GROOVY_HOME" -a -d "$GROOVY_HOME/bin" ]
+then
+    if [ "$RUNNING_CYGWIN" = 'true' ]
+    then
+        PATH=$PATH${PATH+:}`cygpath -u $GROOVY_HOME/bin`
+    else
+        PATH=$PATH${PATH+:}$GROOVY_HOME/bin
+    fi
+fi
+
+#
+# if PERL_LOCAL_LIB_ROOT/bin exists add it
+#
+if [ -n "${PERL_LOCAL_LIB_ROOT}" -a -d "${PERL_LOCAL_LIB_ROOT}/bin" ]
+then
+    PATH="/Users/lbrinton/perl5/bin${PATH+:}${PATH}"; export PATH;
+fi
+
+#
+# if ORACLE_HOME/bin exists add it
+#
+if [ -n "$ORACLE_HOME" -a -d "$ORACLE_HOME/bin" ]
+then
+    if [ "$RUNNING_CYGWIN" = 'true' ]
+    then
+        PATH=$PATH${PATH+:}`cygpath -u $ORACLE_HOME/bin`
+    else
+        PATH=$PATH${PATH+:}$ORACLE_HOME/bin
+    fi
+fi
+
+
+#
+# if SQL_PATH exists add it
+#
+if [ -n "$SQL_PATH" ]
+then
+  if [ "$RUNNING_CYGWIN" = 'true' ]
+  then
+    if [ -d $(cygpath -u $SQL_PATH) ]
+    then
+      PATH=$PATH${PATH+:}`cygpath -u $SQL_PATH`
+    fi
+  fi
+fi
+
+#
+# if $HOME/go/bin exists add it
+#
+if [ -d "${HOME}/go/bin" ]
+then
+    PATH=${PATH}:${HOME}/go/bin
+fi
+
+if [ "$RUNNING_MINGW" = 'true' ]
+then
+    if [ -d /c/Go/bin ]
+    then
+        PATH="${PATH}:/c/Go/bin"
+    fi
+fi
+
+# if running under cygwin add windows system 
+#
+if [ "$RUNNING_CYGWIN" = 'true' ]
+then
+    PATH=$PATH${PATH+:}`cygpath -u $WINDIR`
+
+    if [ -d `cygpath -u $WINDIR/system` ]
+    then
+        PATH=$PATH:`cygpath -u $WINDIR/system`
+    fi
+
+    if [ -d `cygpath -u $WINDIR/system32` ]
+    then
+        PATH=$PATH:`cygpath -u $WINDIR/system32`
+    fi
+
+    if [ -d `cygpath -u $WINDIR/system32/Wbem` ]
+    then
+        PATH=$PATH:`cygpath -u $WINDIR/system32/Wbem`
+    fi
+elif [ "$RUNNING_MINGW" = 'true' ]
+then
+    if [ -d /c/WINDOWS ]
+    then
+        PATH=$PATH:/c/WINDOWS
+        PATH=$PATH:/c/WINDOWS/system32
+        PATH=$PATH:/c/WINDOWS/system32/Wben
+    fi
+
+    if [ -d /usr/local/cmake-2.8.8-win32-x86/bin ]
+    then
+	PATH="${PATH}:/usr/local/cmake-2.8.8-win32-x86/bin"
+    fi
+
+    if [ -d '/c/Program Files/Mercurial' ]
+    then
+        PATH=${PATH}${PATH+:}"/c/Program Files/Mercurial"
+    fi
+
+    if [ -d /c/Python32 ]
+    then
+        PATH="${PATH}:/c/Python32"
+    fi
+fi
+
+if [ -d /usr/local/clang/bin ]
+then
+  PATH="${PATH}:/usr/local/clang/bin"
+fi
+
+if [ -d /usr/local/llvm/bin ]
+then
+  PATH="${PATH}:/usr/local/llvm/bin"
+fi
+
+export PATH
+
+#------------------------------------------------------------------------------
+# Readline configuration
+#------------------------------------------------------------------------------
+if [ -f "${HOME}/.inputrc" ]
+then
+  INPUTRC="${HOME}/.inputrc"
+elif [ -f /etc/inputrc ]
+then
+  INPUTRC=/etc/inputrc
+fi
+
+#------------------------------------------------------------------------------
+# Terminal definition
+#------------------------------------------------------------------------------
+if [ ! "$TERM" ]
+then
+    TERM=linux
+fi
+
+if [ "$RUNNING_DARWIN" = 'true' -a "$TERM" = 'xterm' ]
+then
+    TERM=xterm-color
+fi
+export TERM INPUTRC
+
+#------------------------------------------------------------------------------
+# Setup the LS_COLORS environment variable
+#------------------------------------------------------------------------------
+if [ -x /usr/bin/dircolors -a -f ${HOME}/config/dircolors ]
+then
+    eval `dircolors --bourne-shell ${HOME}/config/dircolors`
+fi
+
+# a     black 
+# b     red 
+# c     green 
+# d     brown 
+# e     blue 
+# f     magenta 
+# g     cyan 
+# h     light grey 
+# A     bold black, usually shows up as dark grey 
+# B     bold red 
+# C     bold green 
+# D     bold brown, usually shows up as yellow 
+# E     bold blue 
+# F     bold magenta 
+# G     bold cyan 
+# H     bold light grey; looks like bright white 
+# x     default foreground or background 
+
+#   1. directory
+#   2. symbolic link
+#   3. socket
+#   4. pipe
+#   5. executable
+#   6. block special
+#   7. character special
+#   8. executable with setuid bit set
+#   9. executable with setgid bit set
+#  10. directory writable to others, with sticky bit
+#  11. directory writable to others, without sticky bit
+
+# dir = bold blue
+# sym link = bold magenta
+# socket   = bold green
+# pipe     = yellow
+# exe      = bold red
+# block sp = blue on cyan
+# char sp  = blue on brown
+# setuid x = black on red
+# setgid x = black on cyan
+# dir o+ws = black on green
+# dir o+w  = black on brown
+
+export CLICOLOR=ON
+export LSCOLORS=ExFxCxDxBxegedabagacad
+
+#------------------------------------------------------------------------------
+# Set LOCATE_PATH - A colon separated list of database file names by the
+# locate command.
+#------------------------------------------------------------------------------
+if [ "$RUNNING_CYGWIN" = 'true' ]
+then
+    export LOCATE_PATH=/usr/var/locatedb
+fi
+
+#------------------------------------------------------------------------------
+# Set CDPATH - A colon separated list of directories used as a
+# search path for 'cd'
+#------------------------------------------------------------------------------
+CDPATH=".:${HOME}"
+
+if [ -d ${HOME}/dev/projects ]
+then
+  CDPATH="${CDPATH}:${HOME}/dev/projects"
+fi
+
+if [ -d /cygdrive/c/SESCO ]
+then
+  CDPATH="${CDPATH}:/cygdrive/c/SESCO"
+fi
+
+export CDPATH
+
+#------------------------------------------------------------------------------
+# Set MAILPATH - A colon separated list of files which
+# the shell periodically checks for new mail.
+#------------------------------------------------------------------------------
+if [ -f "/var/spool/mail/${LOGNAME}" ]
+then
+    MAILPATH="/var/spool/mail/$LOGNAME"
+fi
+export MAILPATH
+
+#------------------------------------------------------------------------------
+# Set BOOST_BUILD_PATH - The absolute path of the Boost.Build root directory.   
+#------------------------------------------------------------------------------
+if [ -d '/usr/local/boost-build' ]
+then
+    if [ "$RUNNING_CYGWIN" = 'true' ]
+    then
+      BOOST_BUILD_PATH=$(cygpath --mixed '/usr/local/boost-build')
+      export BOOST_BUILD_PATH
+    fi
+fi
+
+#---------------------------------------------------------------------------
+# Set CPATH - A colon separated list of directories searched
+# for include files.
+#---------------------------------------------------------------------------
+CPATH='/usr/include'
+
+if [ -d /opt/local/include ]
+then
+    CPATH="/opt/local/include:${CPATH}"
+fi
+
+if [ -d /usr/local/include ]
+then
+    CPATH="/usr/local/include:${CPATH}"
+fi
+export CPATH
+
+#---------------------------------------------------------------------------
+# Set CMAKE_INCLUDE_PATH - A colon separated list of directories searched
+# for include files by CMake.
+#---------------------------------------------------------------------------
+if [ "$RUNNING_MINGW" = 'true' ]
+then
+  if [ -d /usr/local/include ]
+  then
+    export CMAKE_INCLUDE_PATH='C:/MinGW/msys/1.0/local/include'
+  fi
+
+  if [ -d /usr/local/lib ]
+  then
+    export CMAKE_LIBRARY_PATH='C:/MinGW/msys/1.0/local/lib'
+  fi
+fi
+
+#---------------------------------------------------------------------------
+# Set LIBRARY_PATH - A colon separated list of directories searched
+# for libraries.
+#---------------------------------------------------------------------------
+if [ -d /lib ]
+then
+    LIBRARY_PATH="/lib${LIBRARY_PATH+:}${LIBRARY_PATH}"
+fi
+
+if [ -d /usr/lib ]
+then
+    LIBRARY_PATH="/usr/lib${LIBRARY_PATH+:}${LIBRARY_PATH}"
+fi
+
+if [ -d /opt/local/lib ]
+then
+    LIBRARY_PATH="/opt/local/lib${LIBRARY_PATH+:}${LIBRARY_PATH}"
+fi
+
+if [ -d /usr/local/lib ]
+then
+    LIBRARY_PATH="/usr/local/lib${LIBRARY_PATH+:}${LIBRARY_PATH}"
+fi
+
+export LIBRARY_PATH
+
+#---------------------------------------------------------------------------
+# Set LD_LIBRARY_PATH - A colon separated list of directories searched
+# for dynamic libraries.
+#---------------------------------------------------------------------------
+if [ "$RUNNING_LINUX" = 'true' -o "$RUNNING_CYGWIN" = 'true' ]
+then
+#LD_LIBRARY_PATH='/usr/lib'
+#
+
+  if [ -d /usr/local/lib ]
+  then
+    LD_LIBRARY_PATH="/usr/local/lib:${LD_LIBRARY_PATH}"
+  fi
+  export LD_LIBRARY_PATH
+fi
+
+#---------------------------------------------------------------------------
+# Set DYLD_LIBRARY_PATH - A colon separated list of directories searched
+# for dynamic libraries.
+#---------------------------------------------------------------------------
+#if [ "$RUNNING_DARWIN" = 'true' ]
+#then
+#  DYLD_LIBRARY_PATH='/usr/lib'
+#
+#  if [ -d /opt/local/lib ]
+#  then
+#    DYLD_LIBRARY_PATH="/opt/local/lib:${DYLD_LIBRARY_PATH}"
+#  fi
+#
+#  if [ -d /usr/local/lib ]
+#  then
+#    DYLD_LIBRARY_PATH="/usr/local/lib:${DYLD_LIBRARY_PATH}"
+#  fi
+#  export DYLD_LIBRARY_PATH
+#fi
+
+#------------------------------------------------------------------------------
+# Set PS1 - The primary prompt string to the current working directory
+# followed by a space followed by a '$' and another space.
+#------------------------------------------------------------------------------
+if [ -n "${BASH_VERSION}" ]
+then
+    PS1='\W \$ '
+else
+    PS1='\$ '
+fi
+
+#------------------------------------------------------------------------------
+# Set PS2 - The secondary prompt string to > followed by a space. 
+#------------------------------------------------------------------------------
+PS2='> '
+
+export PS1 PS2
+
+#
+# Set the default pager
+#------------------------------------------------------------------------------
+if [ -x /usr/bin/less ]
+then
+    PAGER=less
+
+    ###########################################################################
+    #
+    # Set environment variables for less
+    #
+    ###########################################################################
+    #--------------------------------------------------------------------------
+    # Set the options for less
+    #
+    #	-C : Scroll by clearing and repainting
+    #	-e : Exit at end of file (second time)
+    #	-g : Highlight only the string found by last search
+    #	-i : Ignore case in searches
+    #	-n : Suppress line numbers	
+    #	-m : Prompt style (Like more)
+    #	-Q : Quiet, do not ring the bell for errors
+    #	-s : Squeeze multiple blank lines into one
+    #	-x : Set tab stops
+    #--------------------------------------------------------------------------
+    LESS="-eisnmQRs -x4"
+    export LESS
+else
+    PAGER=more
+fi
+export PAGER
+
+if [ -x /usr/bin/lesspipe ]
+then
+  eval `lesspipe`
+fi
+
+#------------------------------------------------------------------------------
+# Set the default editor
+#------------------------------------------------------------------------------
+EDITOR=vim
+VISUAL=vim
+
+export EDITOR VISUAL
+
+#---------------------------------------------------------------------------
+# Set the location of the artistic style option file
+#---------------------------------------------------------------------------
+if [ -f "${HOME}/config/astylerc" ]
+then
+    export ARTISTIC_STYLE_OPTIONS="${HOME}/config/astylerc"
+fi
+
+#---------------------------------------------------------------------------
+# Set XNLSPATH - X Locales
+#---------------------------------------------------------------------------
+if [ -d /usr/X11R6/lib/X11/locale ]
+then
+    export XNLSPATH=/usr/X11R6/lib/X11/locale
+elif [ -d /usr/X11R6/lib/X11/nls ]
+then
+    export XNLSPATH=/usr/X11R6/lib/X11/nls
+fi
+
+#------------------------------------------------------------------------------
+# Set the sgml catalog and xml catalog
+#------------------------------------------------------------------------------
+unset sgml xml
+
+all_sgml_catalogs="\
+/etc/sgml/catalog
+/sw/share/sgml/catalog
+/usr/local/share/sgml/catalog
+/usr/share/openjade/catalog
+/usr/share/xml/docbook/4.3/docbook.cat         
+/usr/local/share/docbook-dsssl/catalog"
+
+all_opensp_dirs="\
+/usr/share/OpenSP
+/opt/local/share/OpenSP
+/sw/share/OpenSP"
+
+for cat in $all_sgml_catalogs
+do
+  if [ -f "${cat}" ]
+  then
+    sgml="${sgml}${sgml+:}${cat}"
+  fi
+done
+
+for opensp in $all_opensp_dirs
+do
+  if [ -d "$opensp" ]
+  then
+    for cat in $(ls ${opensp}/*.soc)
+    do
+      sgml="${sgml}${sgml+:}${cat}"
+    done
+  fi
+done
+
+export SGML_CATALOG_FILES="${sgml}"
+unset sgml cat all_sgml_catalogs all_opensp_dirs
+
+all_xml_catalogs="\
+/etc/xml/catalog
+/opt/local/etc/xml/catalog
+/sw/etc/xml/catalog
+/usr/local/lib/xml/catalog"
+
+for cat in $all_xml_catalogs
+do
+  if [ -f "${cat}" ]
+  then
+    xml="${xml}${xml+ }${cat}"
+  fi
+done
+export XML_CATALOG_FILES="${xml}"
+unset xml cat all_xml_catalogs
+
+#------------------------------------------------------------------------------
+# Set up html tidy
+#------------------------------------------------------------------------------
+export HTML_TIDY="$HOME/config/tidy"
+
+#------------------------------------------------------------------------------
+# Set the EMACSHOME and EMACSVERSION environment variables.
+#------------------------------------------------------------------------------
+if [ "$RUNNING_CYGWIN"  = 'true' -o "$RUNNING_MINGW" = 'true' ]
+then
+	all_emacsen="\
+22.3
+23.3
+24.1
+24.2
+24.3
+25.2.1"
+
+    for emacs_version in $all_emacsen
+    do
+      if [ "$RUNNING_CYGWIN" = 'true' ]
+      then 
+        if [ -d "/usr/local/emacs-${emacs_version}" ]
+        then
+          EMACSHOME="/usr/local/emacs-${emacs_version}"
+        fi
+      elif [ "$RUNNING_MINGW" = 'true' ]
+      then
+        if [ -d "/c/cygwin/usr/local/emacs-${emacs_version}" ]
+        then
+          EMACSHOME="/c/cygwin/usr/local/emacs-${emacs_version}"
+        fi
+      fi
+    done
+    unset all_emacsen emacs_version
+
+    if [ -n "$EMACSHOME" ]
+    then
+      export EMACSHOME
+    fi
+fi
+
+#------------------------------------------------------------------------------
+# Set the MANPATH environment variable.
+# A colon separated list of directories in which to search for man files
+#------------------------------------------------------------------------------
+if [ -d /usr/local/ast/man ]
+then
+    export MANPATH="${MANPATH}:/usr/local/ast/man"
+fi
+
+if [ -d /opt/local/share/man ]
+then
+    export MANPATH="${MANPATH}:/opt/local/share/man"
+fi
+
+if [ -d /usr/local/mysql/man ]
+then
+    export MANPATH="${MANPATH}:/usr/local/mysql/man"
+fi
+
+#------------------------------------------------------------------------------
+# Set the INFOPATH environment variable.
+# A colon separated list of directories in which to search for info 'dir' files
+#------------------------------------------------------------------------------
+INFOPATH=.
+
+all_info_paths="\
+/sw/info
+/sw/share/info
+/opt/local/share/info
+/usr/local/share/info
+/usr/local/info
+/usr/share/info
+/usr/info
+/usr/autotool/devel/info
+/usr/autotool/stable/info"
+
+for i in $all_info_paths
+do
+  if [ -d "${i}" ]
+  then
+    INFOPATH="${INFOPATH}${INFOPATH+:}${i}"
+  fi
+done
+unset all_info_paths
+
+if [ -n $EMACSHOME ]
+then
+  if [ -f "$EMACSHOME/info/dir" ]
+  then
+    INFOPATH="$INFOPATH${INFOPATH+:}$EMACSHOME/info"
+  fi
+fi
+export INFOPATH
+
+#------------------------------------------------------------------------------
+# Set the SYSSCREENRC variable location of the system level screen config file.
+#------------------------------------------------------------------------------
+if [ "$RUNNING_CYGWIN" = 'true' ]
+then
+  export SYSSCREENRC=/etc/screenrc
+fi
+
+
+#---------------------------------------------------------------------------
+# Set the SCHEME_LIBRARY_PATH variable location of slib.
+# Set the SCM_INIT_PATH       variable location of scm's init file.
+#---------------------------------------------------------------------------
+if [ -d /usr/share/guile/1.4/slib ]
+then
+    export SCHEME_LIBRARY_PATH=/usr/share/guile/1.4/slib
+elif [ -d /usr/local/lib/slib ]
+then
+    export SCHEME_LIBRARY_PATH=/usr/local/lib/slib/
+fi
+
+if [ -f /usr/local/lib/scm/Init5d4.scm ]
+then
+    export SCM_INIT_PATH=/usr/local/lib/scm/Init5d4.scm
+fi
+
+#------------------------------------------------------------------------------
+# Build a new signature file
+#------------------------------------------------------------------------------
+if [ -f ${HOME}/.signify -a -x /usr/bin/signify  ]
+then
+	signify > "${HOME}/.signature"
+fi
+
+#------------------------------------------------------------------------------
+# Start in the users home directory
+#------------------------------------------------------------------------------
+if [ ! "${HOME}" == "${PWD}" ]
+then
+    cd "${HOME}"
+fi
+
+#------------------------------------------------------------------------------
+# Setup ssh-agent
+#------------------------------------------------------------------------------
+if [ "$RUNNING_CYGWIN" = 'true' ]
+then
+    if [ -x "${HOME}/bin/sshtool" ]
+    then
+        eval $("${HOME}/bin/sshtool")
+    fi
+
+    echo 'Loading ssh keys ...'
+
+    for key in id_rsa id_dsa trexone_rsa
+    do
+        if [ -e "${HOME}/.ssh/${key}" ]
+        then
+            echo "$key"
+            keychain --quick "${HOME}/.ssh/${key}"
+            . "${HOME}/.keychain/${HOSTNAME}-sh" > /dev/null
+        fi
+    done
+    unset key
+fi
+
+if [ "$RUNNING_CYGWIN" = 'true' ]
+then
+  export dev=/cygdrive/c/dev
+  export sesco=/cygdrive/c/SESCO
+fi
+
+if [ -d /home/lee/TRexOne ]
+then
+  export TREXONE_CURR_VERSION=/home/lee/TRexOne
+fi
+
+###############################################################################
+# End of bourne_common_startup
+###############################################################################
+

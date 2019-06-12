@@ -1,4 +1,4 @@
-##### vim:set filetype=sh : ###################################################
+##### vim:set filetype=sh : ##################################################
 #
 # bourne_common_startup
 #
@@ -9,15 +9,16 @@
 # Process this file in your specific shell startup script:
 #	. $HOME/.bourne-common-startup
 #
-###############################################################################
+##############################################################################
 
-#******************************************************************************
+#*****************************************************************************
 # System stuff
-#******************************************************************************
-#------------------------------------------------------------------------------
+#*****************************************************************************
+#-----------------------------------------------------------------------------
 # Set the shell process's file creation mask
-#------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 umask 022
+
 #---------------------------------------------------------------------------
 # Set LANG environment variable.
 #---------------------------------------------------------------------------
@@ -104,7 +105,7 @@ fi
 # Set the temporary directory
 #
 # If TMP is undefined and /tmp exists and is a directory
-#	Set TMP to /tmp
+#       Set TMP to /tmp
 #------------------------------------------------------------------------------
 if [ -d /tmp ]
 then
@@ -120,7 +121,7 @@ then
     if [ -d '/cygdrive/c/Program Files/Java/jdk1.8.0_45' ]
     then
         export JAVA_VERSION='1.8.0_45'
-	export JAVA_HOME=`cygpath --mixed "/cygdrive/c/Program Files/Java/jdk${JAVA_VERSION}"`
+        export JAVA_HOME=`cygpath --mixed "/cygdrive/c/Program Files/Java/jdk${JAVA_VERSION}"`
     fi
 elif [ "$RUNNING_MINGW" = 'true' ]
 then
@@ -142,7 +143,7 @@ then
     then
 all_vm_list="\
 jdk1.8.0_45.jdk/Contents/Home
-jdk1.8.0_66.jdk/Contents/Home
+jdk1.8.0_66.jdk/Contents/Home"
 
         for vm in $all_vm_list
         do
@@ -180,7 +181,7 @@ all_vm_list="\
       fi
     done
     unset all_vm_list
-    
+
     if [ -n JAVA_HOME ]
     then
         export JAVA_HOME
@@ -194,7 +195,7 @@ tomcat_version=6.0.37
 
 if [ -d "/usr/local/apache-tomcat-$tomcat_version" ]
 then
-    
+
     if [ "$RUNNING_CYGWIN" = 'true' ]
     then
         CATALINA_HOME=`cygpath -w /usr/local/apache-tomcat-$tomcat_version`
@@ -212,7 +213,7 @@ m2_version=2.0.4
 
 if [ -d "/usr/local/maven-${m2_version}" ]
 then
-    
+
     if [ "$RUNNING_CYGWIN" = 'true' ]
     then
         M2_HOME=`cygpath -w /usr/local/maven-${m2_version}`
@@ -261,7 +262,7 @@ fi
 # libraries/
 #------------------------------------------------------------------------------
 if [ -d "$HOME/perl5" ]
-then 
+then
   PERL_LOCAL_LIB_ROOT="${HOME}/perl5${PERL_LOCAL_LIB_ROOT+:}${PERL_LOCAL_LIB_ROOT}"
   export PERL_LOCAL_LIB_ROOT
 
@@ -350,7 +351,7 @@ fi
 unset PATH
 
 #
-# If user is root 
+# If user is root
 #
 if [ $SELF == 'root' ]
 then
@@ -547,7 +548,8 @@ then
     PATH=${PATH}:${HOME}/.cargo/bin
 fi
 
-# if running under cygwin add windows system 
+#
+# if running under cygwin add windows system
 #
 if [ "$RUNNING_CYGWIN" = 'true' ]
 then
@@ -578,7 +580,7 @@ then
 
     if [ -d /c/MinGW/bin ]
     then
-	PATH="${PATH}:/c/MinGW/bin"
+        PATH="${PATH}:/c/MinGW/bin"
     fi
 
     if [ -d '/c/Program Files/Mercurial' ]
@@ -651,23 +653,23 @@ then
     eval `dircolors --bourne-shell ${HOME}/config/dircolors`
 fi
 
-# a     black 
-# b     red 
-# c     green 
-# d     brown 
-# e     blue 
-# f     magenta 
-# g     cyan 
-# h     light grey 
-# A     bold black, usually shows up as dark grey 
-# B     bold red 
-# C     bold green 
-# D     bold brown, usually shows up as yellow 
-# E     bold blue 
-# F     bold magenta 
-# G     bold cyan 
-# H     bold light grey; looks like bright white 
-# x     default foreground or background 
+# a     black
+# b     red
+# c     green
+# d     brown
+# e     blue
+# f     magenta
+# g     cyan
+# h     light grey
+# A     bold black, usually shows up as dark grey
+# B     bold red
+# C     bold green
+# D     bold brown, usually shows up as yellow
+# E     bold blue
+# F     bold magenta
+# G     bold cyan
+# H     bold light grey; looks like bright white
+# x     default foreground or background
 
 #   1. directory
 #   2. symbolic link
@@ -840,7 +842,7 @@ then
 fi
 
 #------------------------------------------------------------------------------
-# Set PS2 - The secondary prompt string to > followed by a space. 
+# Set PS2 - The secondary prompt string to > followed by a space.
 #------------------------------------------------------------------------------
 PS2='> '
 
@@ -861,15 +863,15 @@ then
     #--------------------------------------------------------------------------
     # Set the options for less
     #
-    #	-C : Scroll by clearing and repainting
-    #	-e : Exit at end of file (second time)
-    #	-g : Highlight only the string found by last search
-    #	-i : Ignore case in searches
-    #	-n : Suppress line numbers	
-    #	-m : Prompt style (Like more)
-    #	-Q : Quiet, do not ring the bell for errors
-    #	-s : Squeeze multiple blank lines into one
-    #	-x : Set tab stops
+    #   -C : Scroll by clearing and repainting
+    #   -e : Exit at end of file (second time)
+    #   -g : Highlight only the string found by last search
+    #   -i : Ignore case in searches
+    #   -n : Suppress line numbers
+    #   -m : Prompt style (Like more)
+    #   -Q : Quiet, do not ring the bell for errors
+    #   -s : Squeeze multiple blank lines into one
+    #   -x : Set tab stops
     #--------------------------------------------------------------------------
     LESS="-eisnmQRs -x4"
     export LESS
@@ -961,7 +963,7 @@ all_sgml_catalogs="\
 /sw/share/sgml/catalog
 /usr/local/share/sgml/catalog
 /usr/share/openjade/catalog
-/usr/share/xml/docbook/4.3/docbook.cat         
+/usr/share/xml/docbook/4.3/docbook.cat
 /usr/local/share/docbook-dsssl/catalog"
 
 all_opensp_dirs="\
@@ -1017,7 +1019,7 @@ export HTML_TIDY="$HOME/config/tidy"
 #------------------------------------------------------------------------------
 if [ "$RUNNING_CYGWIN"  = 'true' -o "$RUNNING_MINGW" = 'true' ]
 then
-	all_emacsen="\
+        all_emacsen="\
 22.3
 23.3
 24.1
@@ -1028,7 +1030,7 @@ then
     for emacs_version in $all_emacsen
     do
       if [ "$RUNNING_CYGWIN" = 'true' ]
-      then 
+      then
         if [ -d "/usr/local/emacs-${emacs_version}" ]
         then
           EMACSHOME="/usr/local/emacs-${emacs_version}"
@@ -1101,7 +1103,6 @@ then
   export SYSSCREENRC=/etc/screenrc
 fi
 
-
 #---------------------------------------------------------------------------
 # Set the SCHEME_LIBRARY_PATH variable location of slib.
 # Set the SCM_INIT_PATH       variable location of scm's init file.
@@ -1124,7 +1125,7 @@ fi
 #------------------------------------------------------------------------------
 if [ -f ${HOME}/.signify -a -x /usr/bin/signify  ]
 then
-	signify > "${HOME}/.signature"
+        signify > "${HOME}/.signature"
 fi
 
 #-----------------------------------------------------------------------------

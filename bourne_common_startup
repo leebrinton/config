@@ -1,11 +1,13 @@
-
-##############################################################################
+##### vim:set filetype=sh : ###################################################
 #
 # bourne_common_startup
 #
 # This file contains startup commands common to all
 # Bourne shell derived interactive shellls including:
 #	Bourne shell, Korn shell and Bash.
+#
+# Process this file in your specific shell startup script:
+#	. $HOME/.bourne-common-startup
 #
 ###############################################################################
 
@@ -16,24 +18,70 @@
 # Set the shell process's file creation mask
 #------------------------------------------------------------------------------
 umask 022
+#---------------------------------------------------------------------------
+# Set LANG environment variable.
+#---------------------------------------------------------------------------
+if [ -x /usr/bin/locale ]
+then
+    set_lang_str=`/usr/bin/locale | grep LANG`
+    export_lang_str="export $set_lang_str"
+    eval $export_lang_str
+fi
 
 #---------------------------------------------------------------------------
-# Set the RUNNING_CYGWIN, RUNNING_MINGW,
+# Set the RUNNING_CYGWIN, RUNNING_MINGW, RUNNING_MSYS2
 # and RUNNING_DARWIN environment variables.
 #---------------------------------------------------------------------------
 RUNNING_CYGWIN=false
-RUNNING_MINGW=false
+RUNNING_MSYS2=false
+RUNNING_MINGW32=false
+RUNNING_MINGW64=false
+RUNNING_MSYS2_BASED_ENV=false
 RUNNING_DARWIN=false
+RUNNING_FREEBSD=false
 
 case `uname` in
   CYGWIN*)
     RUNNING_CYGWIN=true;;
-  MINGW*)
-    RUNNING_MINGW=true;;
   Darwin*)
     RUNNING_DARWIN=true;;
+  MINGW32*)
+    RUNNING_MINGW32=true;;
+  MINGW64*)
+    RUNNING_MINGW64=true;;
+  MSYS_NT*)
+    RUNNING_MSYS2=true;;
+  FreeBSD*)
+    RUNNING_FREEBSD=true;;
 esac
-export RUNNING_CYGWIN RUNNING_MINGW RUNNING_DARWIN
+
+if [ "$RUNNING_MINGW32" = 'true' -o \
+     "$RUNNING_MINGW64" = 'true' -o \
+     "$RUNNING_MSYS2" = 'true' ]
+then
+    RUNNING_MSYS2_BASED_ENV=true
+fi
+
+export RUNNING_CYGWIN RUNNING_DARWIN RUNNING_FREEBSD
+export RUNNING_MINGW32 RUNNING_MINGW64 RUNNING_MSYS2 RUNNING_MSYS2_BASED_ENV
+
+#
+# MSYS2 is really 3 different environments, it uses environment vars to define
+# these environments. Use their profile to generate the vars.
+#
+if [ "$RUNNING_MSYS2_BASED_ENV" = 'true' ]
+then
+    . /etc/profile
+fi
+
+#---------------------------------------------------------------------------
+# Set ENV to a file invoked each time sh is started for interactive use.
+#---------------------------------------------------------------------------
+if [ -e ${HOME}/.shrc ]
+then
+  ENV="${HOME}/.shrc"
+  export ENV
+fi
 
 #---------------------------------------------------------------------------
 # Set the PRINTER environment variable.
@@ -55,12 +103,12 @@ fi
 #------------------------------------------------------------------------------
 # Set the temporary directory
 #
-# If /tmp exists and is a directory
+# If TMP is undefined and /tmp exists and is a directory
 #	Set TMP to /tmp
 #------------------------------------------------------------------------------
 if [ -d /tmp ]
 then
-    export TMP=/tmp
+    export TMP="${TMP:-/tmp}"
 fi
 
 #------------------------------------------------------------------------------
@@ -69,23 +117,33 @@ fi
 #------------------------------------------------------------------------------
 if [ "$RUNNING_CYGWIN" = 'true' ]
 then
-    if [ -d '/cygdrive/c/Program Files/Java/jdk1.7.0_51' ]
+    if [ -d '/cygdrive/c/Program Files/Java/jdk1.8.0_45' ]
     then
-        export JAVA_VERSION='1.7.0_51'
+        export JAVA_VERSION='1.8.0_45'
 	export JAVA_HOME=`cygpath --mixed "/cygdrive/c/Program Files/Java/jdk${JAVA_VERSION}"`
     fi
 elif [ "$RUNNING_MINGW" = 'true' ]
 then
-    if [ -d '/c/Program Files/Java/jdk1.7.0_51' ]
+    if [ -d '/c/Program Files/Java/jdk1.8.0_45' ]
     then
-        export JAVA_VERSION='1.6.0_29'
+        export JAVA_VERSION='1.8.0_45'
+        export JAVA_HOME="C:/Program Files/Java/jdk${JAVA_VERSION}"
+    fi
+elif [ "$RUNNING_MSYS2_BASED_ENV" = 'true' ]
+then
+    if [ -d '/c/Program Files/Java/jdk1.8.0_45' ]
+    then
+        export JAVA_VERSION='1.8.0_45'
         export JAVA_HOME="C:/Program Files/Java/jdk${JAVA_VERSION}"
     fi
 elif [ "$RUNNING_DARWIN" = 'true' ]
 then
     if [ -d /Library/Java/JavaVirtualMachines ]
     then
-        all_vm_list='jdk1.8.0_45.jdk/Contents/Home'
+all_vm_list="\
+jdk1.8.0_45.jdk/Contents/Home
+jdk1.8.0_66.jdk/Contents/Home
+
         for vm in $all_vm_list
         do
         p="/Library/Java/JavaVirtualMachines/${vm}"
@@ -104,10 +162,29 @@ then
     then
         export JAVA_HOME
     fi
-elif [ -d '/usr/lib/jvm/java-6-openjdk' ]
+elif [ -d '/usr/lib/jvm/default-java' ]
 then
-    export JAVA_VERSION='1.6.0'
-    export JAVA_HOME='/usr/lib/jvm/java-6-openjdk'
+    export JAVA_HOME='/usr/lib/jvm/default-java'
+elif [ -d '/usr/lib/jvm' ]
+then
+all_vm_list="\
+1.6.0
+1.7.0
+1.8.0"
+    for vm in $all_vm_list
+    do
+      p="/usr/lib/jvm/java-${vm}-openjdk-amd64"
+      if [ -d "${p}" ]
+      then
+        JAVA_HOME="${p}"
+      fi
+    done
+    unset all_vm_list
+    
+    if [ -n JAVA_HOME ]
+    then
+        export JAVA_HOME
+    fi
 fi
 
 #------------------------------------------------------------------------------
@@ -163,6 +240,22 @@ then
 fi
 unset fop_version
 
+#---------------------------------------------------------------------------
+# Set the GRADLE_HOME environment variable.
+#---------------------------------------------------------------------------
+if [ -d '/opt/local/share/java/gradle' ]
+then
+    GRADLE_HOME='/opt/local/share/java/gradle'
+elif [ -d "~/.sdk/candidates/gradle/current" ]
+then
+    GRADLE_HOME="~/.sdk/candidates/gradle/current"
+fi
+
+if [ -n "${GRADLE_HOME}" ]
+then
+    export GRADLE_HOME
+fi
+
 #------------------------------------------------------------------------------
 # Set PERL5LIB - A colon separated list of directories to search for perl 5
 # libraries/
@@ -183,44 +276,6 @@ then
   export PERL_MM_OPT
 fi
 
-#---------------------------------------------------------------------------
-# Set the JETTY_HOME environment variable.
-#---------------------------------------------------------------------------
-jetty_version='5.1.10'
-
-if [ -d "/usr/local/jetty-${jetty_version}" ]
-then
-    if [ "$RUNNING_CYGWIN" = true ]
-    then
-        JETTY_HOME=$(cygpath -w /usr/local/jetty-${jetty_version})
-    else
-        JETTY_HOME="/usr/local/jetty-${jetty_version}"
-    fi
-    export JETTY_HOME
-elif [ -d "/opt/local/share/java/jetty-${jetty_version}" ]
-then
-    export JETTY_HOME="/opt/local/share/java/jetty-${jetty-version}"
-fi
-unset jetty_version
-
-#------------------------------------------------------------------------------
-# Set the GROOVY_HOME environment variable.
-#------------------------------------------------------------------------------
-groovy_version=1.0-beta-10
-
-if [ -d "/usr/local/groovy-$groovy_version" ]
-then
-    
-    if [ "$RUNNING_CYGWIN" = 'true' ]
-    then
-        GROOVY_HOME=`cygpath -w /usr/local/groovy-$groovy_version`
-    else
-        GROOVY_HOME="/usr/local/groovy-$groovy_version"
-    fi
-    export GROOVY_HOME
-fi
-unset groovy_version
-
 #------------------------------------------------------------------------------
 # Set the ORACLE_HOME environment variable
 #------------------------------------------------------------------------------
@@ -239,6 +294,12 @@ then
         then
             export ORACLE_HOME="C:\\instantclient_$oracle_version"
         fi
+    elif [ "$RUNNING_MSYS2_BASED_ENV" = 'true' ]
+    then
+        if [ -d /c/instantclient_$oracle_version ]
+        then
+            export ORACLE_HOME="C:\\instantclient_$oracle_version"
+        fi
     elif [ -d /usr/local/instantclient_$oracle_version ]
     then
         export ORACLE_HOME="/usr/local/instantclient_$oracle_version"
@@ -246,10 +307,10 @@ then
     unset oracle_version
 fi
 
-if [ -e ${HOME}/config/ora_config ]
-then
-  . ${HOME}/config/ora_config
-fi
+#if [ -e ${HOME}/config/ora_config ]
+#then
+#  . ${HOME}/config/ora_config
+#fi
 
 #------------------------------------------------------------------------------
 # Set the GOROOT and GOPATH environment variable
@@ -257,6 +318,9 @@ fi
 if [ -d '/opt/local/go' ]
 then
     export GOROOT='/opt/local/go'
+elif [ -d '/usr/local/go' ]
+then
+    export GOROOT='/usr/local/go'
 fi
 
 if [ -d "${HOME}/go" ]
@@ -320,13 +384,16 @@ all_paths="\
 ."
 else
 all_paths="\
+/usr/local/sbin
 /usr/local/bin
-/usr/bin
+/opt/bin
+/sbin
 /bin
+/usr/sbin
+/usr/bin
 /mingw/bin
 /usr/bin/X11
 /usr/X11R6/bin
-/usr/local/TeX/bin/win32
 /usr/games
 ."
 fi
@@ -351,18 +418,19 @@ fi
 #
 # If JAVA_HOME is set add the java bin dir to the path
 #
-if [ -n "$JAVA_HOME" ]
+if [ -n "${JAVA_HOME}" ]
 then
-  if [ "$RUNNING_CYGWIN" = 'true' ]
-  then
-    PATH=$PATH${PATH+:}`cygpath -u "$JAVA_HOME/bin"`
-  elif [ "$RUNNING_MINGW" = 'true' ]
-  then
-    PATH=$PATH${PATH+:}"/c/Program Files/Java/jdk${JAVA_VERSION}/bin"
-  else
-    PATH=$PATH${PATH+:}$JAVA_HOME/bin
-  fi
+    if [ "$RUNNING_CYGWIN" = 'true' ]
+    then
+        PATH=${PATH}${PATH+:}`cygpath -u "$JAVA_HOME/bin"`
+    elif [ "$RUNNING_MSYS2_BASED_ENV" = 'true' ]
+    then
+        PATH=${PATH}${PATH+:}`cygpath -u "$JAVA_HOME/bin"`
+    else
+        PATH=${PATH}${PATH+:}${JAVA_HOME}/bin
+    fi
 fi
+export PATH
 
 #
 # if ANT_HOME/bin exists add it
@@ -413,19 +481,6 @@ then
 fi
 
 #
-# if GROOVY_HOME/bin exists add it
-#
-if [ -n "$GROOVY_HOME" -a -d "$GROOVY_HOME/bin" ]
-then
-    if [ "$RUNNING_CYGWIN" = 'true' ]
-    then
-        PATH=$PATH${PATH+:}`cygpath -u $GROOVY_HOME/bin`
-    else
-        PATH=$PATH${PATH+:}$GROOVY_HOME/bin
-    fi
-fi
-
-#
 # if PERL_LOCAL_LIB_ROOT/bin exists add it
 #
 if [ -n "${PERL_LOCAL_LIB_ROOT}" -a -d "${PERL_LOCAL_LIB_ROOT}/bin" ]
@@ -446,7 +501,6 @@ then
     fi
 fi
 
-
 #
 # if SQL_PATH exists add it
 #
@@ -462,6 +516,14 @@ then
 fi
 
 #
+# if GOROOT exists add it
+#
+if [ -n "$GOROOT" ]
+then
+  PATH="${PATH}:${GOROOT}/bin"
+fi
+
+#
 # if $HOME/go/bin exists add it
 #
 if [ -d "${HOME}/go/bin" ]
@@ -469,12 +531,20 @@ then
     PATH=${PATH}:${HOME}/go/bin
 fi
 
-if [ "$RUNNING_MINGW" = 'true' ]
+#
+# if $HOME/Library/Python/3.6/bin exists add it
+#
+if [ -d "${HOME}/Library/Python/3.6/bin" ]
 then
-    if [ -d /c/Go/bin ]
-    then
-        PATH="${PATH}:/c/Go/bin"
-    fi
+    PATH="${PATH}:${HOME}/Library/Python/3.6/bin"
+fi
+
+#
+# if $HOME/.cargo/bin exists (rust) add it
+#
+if [ -d "${HOME}/.cargo/bin" ]
+then
+    PATH=${PATH}:${HOME}/.cargo/bin
 fi
 
 # if running under cygwin add windows system 
@@ -506,9 +576,9 @@ then
         PATH=$PATH:/c/WINDOWS/system32/Wben
     fi
 
-    if [ -d /usr/local/cmake-2.8.8-win32-x86/bin ]
+    if [ -d /c/MinGW/bin ]
     then
-	PATH="${PATH}:/usr/local/cmake-2.8.8-win32-x86/bin"
+	PATH="${PATH}:/c/MinGW/bin"
     fi
 
     if [ -d '/c/Program Files/Mercurial' ]
@@ -520,18 +590,24 @@ then
     then
         PATH="${PATH}:/c/Python32"
     fi
-fi
-
-if [ -d /usr/local/clang/bin ]
+elif [ "$RUNNING_MSYS2_BASED_ENV" = 'true' ]
 then
-  PATH="${PATH}:/usr/local/clang/bin"
-fi
+    PATH="$PATH:$ORIGINAL_PATH"
 
-if [ -d /usr/local/llvm/bin ]
-then
-  PATH="${PATH}:/usr/local/llvm/bin"
-fi
+    [ -d /usr/bin/site_perl ] && PATH=$PATH:/usr/bin/site_perl
+    [ -d /usr/bin/vendor_perl ] && PATH=$PATH:/usr/bin/vendor_perl
+    [ -d /usr/bin/core_perl ] && PATH=$PATH:/usr/bin/core_perl
 
+    if [ "$RUNNING_MINGW32" = 'true' ]
+    then
+        PATH="/mingw32/bin:${PATH}"
+    fi
+
+    if [ "$RUNNING_MINGW64" = 'true' ]
+    then
+        PATH="/mingw64/bin:${PATH}"
+    fi
+fi
 export PATH
 
 #------------------------------------------------------------------------------
@@ -553,9 +629,17 @@ then
     TERM=linux
 fi
 
-if [ "$RUNNING_DARWIN" = 'true' -a "$TERM" = 'xterm' ]
+if [ "$RUNNING_DARWIN" = 'true' ]
 then
-    TERM=xterm-color
+    if [ -n "$TERM_PROGRAM" -a "$TERM_PROGRAM" = 'iTerm.app' ]
+    then
+        echo "Running in ${TERM_PROGRAM} ${TERM_PROGRAM_VERSION}"
+    fi
+
+    if [ "$TERM" = 'xterm' ]
+    then
+        TERM=xterm-color
+    fi
 fi
 export TERM INPUTRC
 
@@ -648,18 +732,6 @@ then
     MAILPATH="/var/spool/mail/$LOGNAME"
 fi
 export MAILPATH
-
-#------------------------------------------------------------------------------
-# Set BOOST_BUILD_PATH - The absolute path of the Boost.Build root directory.   
-#------------------------------------------------------------------------------
-if [ -d '/usr/local/boost-build' ]
-then
-    if [ "$RUNNING_CYGWIN" = 'true' ]
-    then
-      BOOST_BUILD_PATH=$(cygpath --mixed '/usr/local/boost-build')
-      export BOOST_BUILD_PATH
-    fi
-fi
 
 #---------------------------------------------------------------------------
 # Set CPATH - A colon separated list of directories searched
@@ -758,13 +830,12 @@ fi
 #fi
 
 #------------------------------------------------------------------------------
+# If not running MSYS2 based environment ...
 # Set PS1 - The primary prompt string to the current working directory
 # followed by a space followed by a '$' and another space.
 #------------------------------------------------------------------------------
-if [ -n "${BASH_VERSION}" ]
+if [ "$RUNNING_MSYS2_BASED_ENV" != 'true' ]
 then
-    PS1='\W \$ '
-else
     PS1='\$ '
 fi
 
@@ -775,7 +846,7 @@ PS2='> '
 
 export PS1 PS2
 
-#
+#------------------------------------------------------------------------------
 # Set the default pager
 #------------------------------------------------------------------------------
 if [ -x /usr/bin/less ]
@@ -807,6 +878,12 @@ else
 fi
 export PAGER
 
+if [ -x /usr/bin/more ]
+then
+  MORE='-erX'
+  export MORE
+fi
+
 if [ -x /usr/bin/lesspipe ]
 then
   eval `lesspipe`
@@ -815,10 +892,45 @@ fi
 #------------------------------------------------------------------------------
 # Set the default editor
 #------------------------------------------------------------------------------
-EDITOR=vim
-VISUAL=vim
+nvimte=`which nvim 2>/dev/null`
+vimtest=`which vim 2>/dev/null`
+vitest=`which vi 2>/dev/null`
+nanotest=`which nano 2>/dev/null`
 
-export EDITOR VISUAL
+if [ -n "$VISUAL" ]
+then
+    echo "Using VISUAL --> $VISUAL"
+elif [ -n "$nvimtest" -a -x "$nvimtest" ]
+then
+  EDITOR=nvim
+  VISUAL=nvim
+elif [ -n "$vimtest" -a -x "$vimtest" ]
+then
+  EDITOR=vim
+  VISUAL=vim
+elif [ -n "$vitest" -a -x "$vitest" ]
+then
+  EDITOR=vi
+  VISUAL=vi
+elif [ -n "$nanotest" -a -x "$nanotest" ]
+then
+  EDITOR=nano
+  VISUAL=nano
+else
+  echo 'Unable to find an editor to configure EDITOR and VISUAL!'
+fi
+
+unset nvimtest vimtest vitest nantest
+
+if [ -n "$EDITOR" ]
+then
+  export EDITOR
+fi
+
+if [ -n "$VISUAL" ]
+then
+  export VISUAL
+fi
 
 #---------------------------------------------------------------------------
 # Set the location of the artistic style option file
@@ -941,19 +1053,9 @@ fi
 # Set the MANPATH environment variable.
 # A colon separated list of directories in which to search for man files
 #------------------------------------------------------------------------------
-if [ -d /usr/local/ast/man ]
-then
-    export MANPATH="${MANPATH}:/usr/local/ast/man"
-fi
-
 if [ -d /opt/local/share/man ]
 then
     export MANPATH="${MANPATH}:/opt/local/share/man"
-fi
-
-if [ -d /usr/local/mysql/man ]
-then
-    export MANPATH="${MANPATH}:/usr/local/mysql/man"
 fi
 
 #------------------------------------------------------------------------------
@@ -1023,6 +1125,14 @@ fi
 if [ -f ${HOME}/.signify -a -x /usr/bin/signify  ]
 then
 	signify > "${HOME}/.signature"
+fi
+
+#-----------------------------------------------------------------------------
+# Fortune
+#-----------------------------------------------------------------------------
+if [ "$RUNNING_FREEBSD" = 'true' ]
+then
+  [ -x /usr/games/fortune ] && /usr/games/fortune freebsd-tips
 fi
 
 #------------------------------------------------------------------------------

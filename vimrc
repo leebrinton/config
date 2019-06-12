@@ -1,18 +1,23 @@
 "=============================================================================
 "
 " vimrc
+"=============================================================================
 "
 " vim - VI iMproved configuration file
 "
 "==============================================================================
 " debug
 "set verbose=9
-" Settings used by vi, and other vi alikes
 
-if has( "gui_win32" )
+"------------------------------------------------------------------------------
+" Settings used by vi, and other vi alikes
+"------------------------------------------------------------------------------
+if filereadable( expand( "~/config/exrc" ))
+  source ~/config/exrc
+elseif filereadable( expand( "$VIM/exrc" ))
   source $VIM/exrc
 else
-  source ~/config/exrc
+  echoerr "No exrc found!"
 endif
 
 " Avoid warning for wrong version
@@ -21,9 +26,61 @@ version 5.0
 "------------------------------------------------------------------------------
 " Important options
 "------------------------------------------------------------------------------
+if filereadable( expand( "$VIMRUNTIME/defaults.vim" ))
+  source $VIMRUNTIME/defaults.vim
+else
+  " Act like Vim not Vi
+  set nocompatible
 
-" Act like Vim not Vi
-set nocompatible
+  " specifies what <BS>, CTRL-W, etc. can do in Insert mode
+  " Allow backspacing over everything in insert mode
+  set backspace=indent,eol,start
+
+  if &history < 1000
+    " how many command lines are remembered
+    set history=1000
+  endif
+
+  " show cursor position below each window
+  set ruler
+
+  " highlight the screen line of the cursor
+  set cursorline
+
+  " show (partial) command keys in the status line
+  set showcmd
+
+  " command-line completion shows a list of matches
+  set wildmenu
+
+  if !has('nvim') && &ttimeoutlen == -1
+    " allow timing out halfway into a key code
+    set ttimeout
+
+    " time in msec for 'ttimeout'
+    set ttimeoutlen=100
+  endif
+
+  " incremental searching
+  set incsearch
+
+  " Don't use Ex mode, use Q for formatting
+  " If you don't like the results modify 'textwidth'
+  map Q gq
+
+  " Do not recognize octal numbers for CTRL-A and CTRL-X commands
+  set nrformats-=octal
+
+  " Use syntax coloring
+  if has( 'syntax' ) && !exists('g:syntax_on')
+    syntax enable
+  endif
+
+  if has("mouse")
+    " list of flags for using the mouse
+    set mouse=a
+  endif
+endif
 
 " Vi compatible options
 " a - Set alternate filename on :read
@@ -154,6 +211,10 @@ set noinsertmode
 set nopaste
 set pastetoggle=<F2>
 
+" I like to use zt to move a line to the top of the viewport. So override
+" default of 5.
+set scrolloff=0
+
 " use defaults for runtimepath and helpfile
 "set runtimepath
 "set helpfile
@@ -204,15 +265,12 @@ endif
 " this is set in .exrc
 "set wrapscan
 
-" incremental searching
-set incsearch
-
 " Allow unescaped * and . in search patterns
 " this is set in .exrc
 " set magic
 
-" Don't ignore case in search patterns
-set noignorecase
+" Ignore case in search patterns, smartcase will turn this off when needed
+set ignorecase
 
 " override 'ignorecase' when pattern has upper case characters
 set smartcase
@@ -259,9 +317,6 @@ set showfulltag
 "set in .exrc
 "set scroll=
 
-" number of screen lines to show around the cursor
-set scrolloff=0
-
 " long lines wrap
 set wrap
 
@@ -277,12 +332,14 @@ set showbreak=>
 " minimal number of columns to scroll horizontally
 set sidescroll=0
 
-" minimal number of columns to keep left and right of the cursor
-set sidescrolloff=0
+if !&sidescrolloff
+  " minimal number of columns to keep left and right of the cursor
+  set sidescrolloff=5
+endif
 
 " include "lastline" to show the last line even if it doesn't fit
 " include "uhex" to show unprintable characters as a hex number
-set display=uhex
+set display=lastline,uhex
 
 " characters to use for the status line, folds and filler lines
 "set fillchars=
@@ -308,42 +365,21 @@ set writedelay=0
 " set in .exrc
 "set nolist
 
-" list of strings used for list mode
-set listchars=eol:$,tab:T#,trail:_,extends:\\,precedes:<
+"if &listchars ==# 'eol:$'
+  set listchars=tab:▸\ ,eol:¬,trail:-,extends:>,precedes:<,nbsp:+
+"endif
 
 " show the line number for each line
-set nonumber
+if exists("g:gui_oni")
+    set number
+else
+    set nonumber
+endif
 
 "------------------------------------------------------------------------------
 " syntax and highlighting
 "------------------------------------------------------------------------------
 
-" Use colors that look good on our background
-if has( 'gui_running' )
-    set background=light
-"else
-"    set background=dark
-endif
-
-"filetype on
-
-" Use syntax coloring
-if has( 'syntax' )
-    syntax on
-
-    if has( 'gui_running' )
-        if filereadable( expand( "~/.vim/colors/solarized.vim" ))
-            colorscheme solarized
-        endif
-    endif
-endif
-
-if &term=="xterm"
-	set t_RV=          " don't check terminal version
-	set t_Co=8
-	set t_Sb=^[4%dm
-	set t_Sf=^[3%dm
-endif
 
 " which highlighting to use for various occasions
 "set highlight
@@ -375,7 +411,9 @@ elseif &term=="cygwin"
 endif
 
 " highlight all matches for the last used search pattern
-set hlsearch
+if &t_Co > 2 || has("gui_running")
+    set hlsearch
+endif
 
 "------------------------------------------------------------------------------
 " multiple windows
@@ -444,6 +482,10 @@ set splitright
 " "ver", "hor" and/or "jump"; list of options for 'scrollbind'
 set scrollopt=ver,hor,jump
 
+if &tabpagemax < 50
+  set tabpagemax=50
+endif
+
 "------------------------------------------------------------------------------
 " terminal
 "------------------------------------------------------------------------------
@@ -456,17 +498,23 @@ set scrollopt=ver,hor,jump
 " alias for 'term': see term
 "set ttytypr=
 
-" check built-in termcaps first
-set ttybuiltin
+if has( "ttybuiltin" )
+  " check built-in termcaps first
+  set ttybuiltin
+endif
 
 " terminal connection is fast
 set ttyfast
 
-" terminal that requires extra redrawing
-set noweirdinvert
+if has("weirdinvert")
+  " terminal that requires extra redrawing
+  set noweirdinvert
+endif
 
-" Allow cursor keys in insert mode
-set esckeys
+if has("esckeys")
+  " Allow cursor keys in insert mode
+  set esckeys
+endif
 
 " Number of lines to scroll when the cursor get off the screen
 set scrolljump=1
@@ -496,16 +544,19 @@ set icon
 " when not empty, text for the icon of this window
 set iconstring=Vim\ %F
 
-" restore the screen contents when exiting Vim
-set restorescreen
+if has("restorescreen")
+  " restore the screen contents when exiting Vim
+  set restorescreen
+endif  
 
 "------------------------------------------------------------------------------
 " using the mouse
 "------------------------------------------------------------------------------
 
 if has("mouse")
-   " list of flags for using the mouse
-   set mouse=a
+   " list of flags for using the mouse 'a' = all modes
+   " set in defaults.vim
+   "set mouse=a
 
    " the window with the mouse pointer becomes the current one
    set nomousefocus
@@ -532,17 +583,26 @@ endif
 "------------------------------------------------------------------------------
 
 if has("gui_win32")
-    set guifont=Courier_New:h9
+"    set guifont=Courier_New:h9
+    set guifont=Courier_New:h16
 endif
 
 " list of font names to be used for double-wide characters
-"set guifontwide=
+set guifontwide=
 
 " list of flags that specify how the GUI works
+"  a - Autoselect; synchronize selection in Visual mode to system selection
+"  g - Make inactive menu items grey
+"  m - Menu bar is present
+"  r - Right hand scrollbar is always present
+"  L = Left hand scrollbar when there is a vertical split
+"
 set guioptions=agmrLT
 
-" use a pseudo-tty for I/O to external commands
-set guipty
+if has("guipty")
+  " use a pseudo-tty for I/O to external commands
+  set guipty
+endif
 
 " "last", "buffer" or "current": which directory used for the file browser
 set browsedir=buffer
@@ -589,15 +649,9 @@ set noterse
 " list of flags to make messages shorter
 set shortmess=filnrxoO
 
-" show (partial) command keys in the status line
-set showcmd
-
 " display the current mode in the status line
 " set in .exrc
 "set showmode
-
-" show cursor position below each window
-set ruler
 
 " alternate format to be used for the ruler
 "set rulerformat=
@@ -627,14 +681,15 @@ set visualbell
 "------------------------------------------------------------------------------
 
 " "old", "inclusive" or "exclusive"; how selecting text behaves
-set selection=exclusive
+"set selection=exclusive
+set selection=inclusive
 
 " "mouse", "key" and/or "cmd"; when to start Select mode
 "  instead of Visual mode
-"set selectmode=
+set selectmode=mouse
 
 " "unnamed" to use the * register like unnamed register
-set clipboard=autoselect
+"set clipboard=autoselect
 
 " "startsel" and/or "stopsel"; what special keys can do
 "set keymodel=
@@ -667,10 +722,6 @@ set textwidth=78
 " set in .exrc
 "set wrapmargin
 
-" specifies what <BS>, CTRL-W, etc. can do in Insert mode
-" Allow backspacing over everything in insert mode
-set backspace=2
-
 " definition of what comment lines look like
 " (local to buffer)
 "set comments=
@@ -696,18 +747,29 @@ set backspace=2
 "   format it.
 set formatoptions=cqr
 
-" specifies how Insert mode completion works
+if v:version > 703 || v:version == 703 && has("patch541")
+  set formatoptions+=j " Delete comment character when joining commented lines
+endif
+" specifies how generic keyword autocompletion works
 " (local to buffer)
 "   . - scan the current buffer
 "   w - scan the other windows
 "   b - scan other loaded buffers
+"   u - scan other unloaded buffers
 "   t - tag completion
-set complete=.,w,b,t,i,k
+"   i - scan included files
+"   k = scan the files given with the dictionary option
+set complete=.,w,b,u,t,i
+set omnifunc=syntaxcomplete#Complete
 
 "list of dictionary files for keyword completion
 if has( "unix" )
-    if filereadable( "/usr/dict/words" )
-        set dictionary=/usr/dict/words
+    if has('mac')
+        set dictionary=/usr/share/dict/words
+    else
+        if filereadable( "/usr/dict/words" )
+            set dictionary=/usr/dict/words
+        endif
     endif
 else
     if filereadable( "c:/cygwin/usr/dict/words" )
@@ -715,8 +777,11 @@ else
     endif
 endif
 
+" wget http://www.gutenberg.org/
 " list of thesaurus files for keyword completion
-"set thesaurus=
+if filereadable( "/usr/local/share/thesaurus/mthesaur.txt" )
+    set thesaurus=/usr/local/share/thesaurus/mthesaur.txt
+endif
 
 " adjust case of a keyword completion match
 set noinfercase
@@ -742,18 +807,13 @@ set matchpairs=(:),{:},[:]
 " Insert two spaces after a period when joining lines
 set joinspaces
 
-" "alpha", "octal" and/or "hex"; number formats recognized for
-" CTRL-A and CTRL-X commands
-" (local to buffer)
-set nrformats=alpha,octal,hex
-
 "------------------------------------------------------------------------------
 " tabs and indenting
 "------------------------------------------------------------------------------
 
 " number of spaces a <Tab> in the text stands for
 " set in .exrc
-"set tabstop=8
+"set tabstop=4
 
 " number of spaces used for each step of (auto)indent
 " (local to buffer)
@@ -777,7 +837,7 @@ set expandtab
 " automatically set the indent of a new line
 " (local to buffer)
 " initally set in .exrc
-"set noautoindent
+"set autoindent
 
 " do clever autoindenting
 " (local to buffer)
@@ -902,14 +962,8 @@ set maxmapdepth=1000
 " set in .exrc
 "set to
 
-" allow timing out halfway into a key code
-set nottimeout
-
 " time in msec for 'timeout'
 set timeoutlen=1000
-
-" time in msec for 'ttimeout'
-set ttimeoutlen=-1
 
 "------------------------------------------------------------------------------
 " reading and writing files
@@ -945,13 +999,6 @@ else
     set fileformats=dos,unix
 endif
 
-" obsolete, use 'fileformat'
-" (local to buffer)
-set notextmode
-
-" obsolete, use 'fileformats'
-set textauto
-    
 " writing files is allowed
 set write
 
@@ -961,6 +1008,28 @@ set writebackup
 " keep a backup after overwriting a file
 set backup
     
+if has('persistent_undo')
+    " keep an undo file (undo changes after closing)
+    set undolevels=5000
+    if has('win32')
+        if !isdirectory( expand( "$APPDATA/vim_undo" ))
+            mkdir( expand( "$APPDATA/vim_undo" ))
+        endif
+        set undodir=$APPDATA/vim_undo
+    else
+        if isdirectory($HOME . "/.local/share/vim_undo")
+            set undodir=$HOME/.local/share/vim_undo
+        else
+            if exists( "*mkdir" )
+                if mkdir($HOME . "/.local/share/vim_undo", "p")
+                    set undodir=$HOME/.local/share/vim_undo
+                endif
+            endif
+        endif
+    endif
+    set undofile
+endif
+
 " patterns that specify for which files a backup is not made
 set backupskip=
 
@@ -992,14 +1061,10 @@ set noautowriteall
 
 " automatically read a file when it was modified outside of Vim
 " (global or local to buffer)
-set noautoread
+set autoread
 
 " keep oldest version of a file; specifies file name extension
 set patchmode=
-
-" use 8.3 file names
-" (local to buffer)
-set noshortname
 
 "------------------------------------------------------------------------------
 " the swap file
@@ -1011,27 +1076,13 @@ set noshortname
 " (local to buffer)
 set swapfile
 
-" "sync", "fsync" or empty; how to flush a swap file to disk
-set swapsync=fsync
-
-" number of characters typed to cause a swap file update
-set updatecount=200
-
 " time in msec after which the swap file will be updated
 set updatetime=4000
-
-" maximum amount of memory in Kbyte used for one buffer
-set maxmem=280448
-
-" maximum amount of memory in Kbyte used for all buffers
-set maxmemtot=280448
 
 "------------------------------------------------------------------------------
 " command line editing
 "------------------------------------------------------------------------------
 
-" how many command lines are remembered 
-set history=20
 
 " key that triggers command-line expansion
 set wildchar=9
@@ -1052,9 +1103,6 @@ set suffixesadd=
 " list of patterns to ignore files for file name completion
 set wildignore=
     
-" command-line completion shows a list of matches
-set wildmenu
-
 " key used to open the command-line window
 set cedit=
     
@@ -1066,11 +1114,13 @@ set cmdwinheight=7
 "------------------------------------------------------------------------------
 
 " name of the shell program used for external commands
-if has( 'unix' )
-    set shell=/bin/bash
-else
-    set shell=cmd.exe
-endif
+" the default of $SHELL or cmd.exe are reasonable
+" maybe set to bash when in a MSYS2 env
+"if has( 'unix' )
+"    set shell=/bin/bash
+"else
+"    set shell=cmd.exe
+"endif
 
 " character(s) to enclose a shell command in
 "set shellquote=
@@ -1129,7 +1179,6 @@ set grepformat=%f:%l:%m,%f:%l%m,%f\ \ %l%m
 "------------------------------------------------------------------------------
 " system specific
 "------------------------------------------------------------------------------
-
 " use forward slashes in file names; for Unix-like shells
 set noshellslash
 "------------------------------------------------------------------------------
@@ -1194,7 +1243,9 @@ set imsearch=0
 
 " character encoding used in Vim: "latin1", "utf-8"
 " "euc-jp", "big5", etc.
-set encoding=utf-8
+if &encoding ==# 'latin1' && has('gui_running')
+  set encoding=utf-8
+endif
 
 " character encoding for the current file
 " (local to buffer)
@@ -1204,13 +1255,22 @@ set fileencoding=
 set fileencodings=ucs-bom
 
 " character encoding used by the terminal
-set termencoding=
+"set termencoding=
 
 " expression used for character encoding conversion
 set charconvert=
 
 " Delete combining (composing) characters on their own
 set nodelcombine
+
+"------------------------------------------------------------------------------
+" spelling
+"------------------------------------------------------------------------------
+" Toggle spell checking on and off with `\s`
+nmap <silent> <leader>s :set spell!<CR>
+
+" Set region to American English
+set spelllang=en_us
 
 "------------------------------------------------------------------------------
 " various 
@@ -1228,7 +1288,7 @@ set loadplugins
 set noexrc
 
 " safer working with script files in the current directory
-set nosecure
+set secure
 
 " use the 'g' flag for ":substitute"
 set nogdefault
@@ -1241,7 +1301,7 @@ set nogdefault
 set maxfuncdepth=100
 
 " list of words that specifies what to put in a session file
-set sessionoptions=blank,buffers,curdir,folds,help,options,winsize
+set sessionoptions=blank,buffers,curdir,folds,help,winsize
 
 " list of words that specifies what to save for :mkview
 set viewoptions=folds,options,cursor
@@ -1250,7 +1310,7 @@ set viewoptions=folds,options,cursor
 "set viewdir=
 
 " list that specifies what to write in the viminfo file
-set viminfo='20,\"50
+set viminfo=!,'20,\"50
 
 " what happens with a buffer when it's no longer in a window
 " (local to buffer)
@@ -1269,24 +1329,26 @@ set debug=
 
 "------------------------------------------------------------------------------
 if has("autocmd")
-  augroup gentoo
-    au!
+  " Enable file type detection.
+  filetype plugin indent on
 
-    " Gentoo-specific settings for ebuilds.  These are the federally-mandated
-    " required tab settings.  See the following for more information:
-    " http://www.gentoo.org/doc/en/xml/gentoo-howto.xml
-    au BufRead,BufNewFile *.e{build,class} let is_bash=1|setft=sh
-    au BufRead,BufNewFile *.e{build,class} set ts=4 sw=4 noexpandtab
+  "autocmd bufwritepost vimrc source $MYVIMRC
 
-    " In text files, limit the width of text to 78 characters, but be careful
-    " that we don't override the user's setting.
-    autocmd BufNewFile,BufRead *.txt if &tw == 0 | set tw=78 | endif
+  augroup vimrcEx
+  au!
 
-    " When editing a file, always jump to the last cursor position
-    autocmd BufReadPost *
-      \ if line("'\"") > 0 && line("'\"") <= line("$") |
-      \   exe "normal g'\"" |
-      \ endif
+  " For all text files set 'textwidth' to 78 characters
+  autocmd FileType text setlocal textwidth=78
+
+  " When editing a file, always jump to the last known cursor position.
+  " Don't do it when the position is invalid or when inside an event handler
+  " (happens when dropping a file on gvim).
+  " Also don't do it when the mark is in the first line, that is the default
+  " position when opening a file.
+  autocmd BufReadPost *
+    \ if line("'\"") > 1 && line("'\"") <= line("$") |
+    \   exe "normal! g`\"" |
+    \ endif
   augroup END
 
 "------------------------------------------------------------------------------
@@ -1309,14 +1371,22 @@ if has("autocmd")
   augroup END
 
 "------------------------------------------------------------------------------
-  augroup perlprog
-    " Remove all perlprog autocommands
-    autocmd! perlprog
+  " Syntax of these languages is fussy over tabs Vs spaces
+  autocmd FileType make setlocal ts=8 sts=8 sw=8 list noexpandtab
+  autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
 
-    autocmd BufRead *.pl set formatoptions=croql
-    autocmd BufRead *.pl set cindent
-    autocmd BufRead *.pl set cinoptions=:0,g0,t0,(1s 
-  augroup END
+"------------------------------------------------------------------------------
+  autocmd BufNewFile,BufRead *.pl6 set filetype=perl6
+
+"------------------------------------------------------------------------------
+"  augroup perlprog
+    " Remove all perlprog autocommands
+"    autocmd! perlprog
+"
+"    autocmd BufRead *.pl set formatoptions=croql
+"    autocmd BufRead *.pl set cindent
+"    autocmd BufRead *.pl set cinoptions=:0,g0,t0,(1s 
+"  augroup END
 
 "------------------------------------------------------------------------------
   augroup java
@@ -1331,6 +1401,48 @@ if has("autocmd")
   augroup END
 
 "------------------------------------------------------------------------------
+  augroup python
+    " Remove all python autcommands
+    autocmd! python
+
+    autocmd BufNewFile,BufRead *.py set tabstop=4
+    autocmd BufNewFile,BufRead *.py set softtabstop=4
+    autocmd BufNewFile,BufRead *.py set shiftwidth=4
+    autocmd BufNewFile,BufRead *.py set textwidth=79
+    autocmd BufNewFile,BufRead *.py set expandtab
+    autocmd BufNewFile,BufRead *.py set autoindent
+    autocmd BufNewFile,BufRead *.py set fileformat=unix
+  augroup END
+
+"------------------------------------------------------------------------------
+  augroup web
+    " Remove all web autocommands
+    autocmd! web
+
+    autocmd BufNewFile,BufRead *.html *.css set tabstop=2
+    autocmd BufNewFile,BufRead *.html *.css set softtabstop=2
+    autocmd BufNewFile,BufRead *.html *.css set shiftwidth=2
+
+    autocmd FileType javascript setlocal ts=4 sts=4 sw=4
+    autocmd BufNewFile,BufRead *.rss setfiletype xml
+  augroup END
+
+"------------------------------------------------------------------------------
+  augroup configure_projects
+    " Remove all configure_projects autcommands
+    autocmd! configure_projects
+    autocmd User ProjectionistActivate call s:linters()
+  augroup END
+
+  function! s:linters() abort
+    let l:linters = projectionist#query('linters')
+
+    if len(l:linters) > 0
+        let b:ale_linters = {&filetype: l:linters[0][1]}
+    endif
+  endfunction
+
+"------------------------------------------------------------------------------
   " perl -cw buffer, open output in a new window
   function! PerlCWBuffer()
     let l:tmpfile1 = tempname()
@@ -1343,45 +1455,106 @@ if has("autocmd")
   endfunction
 
   " run buffer as a perl script, open output in a new window
-  function! PerlBuffer()
-    let l:tmpfile1 = tempname()
-    let l:tmpfile2 = tempname()
+"  function! PerlBuffer()
+"    let l:tmpfile1 = tempname()
+"    let l:tmpfile2 = tempname()
     
-    execute "normal:w!" . l:tmpfile1 . "\<CR>"
-    execute "normal:! perl ".l:tmpfile1." \> ".l:tmpfile2." 2\>\&1 \<CR>"
-    execute "normal:new\<CR>"
-    execute "normal:edit " . l:tmpfile2 . "\<CR>"
-  endfunction
+"    execute "normal:w!" . l:tmpfile1 . "\<CR>"
+"    execute "normal:! perl ".l:tmpfile1." \> ".l:tmpfile2." 2\>\&1 \<CR>"
+"    execute "normal:new\<CR>"
+"    execute "normal:edit " . l:tmpfile2 . "\<CR>"
+"  endfunction
 
   " set of crap we run when editing perl source
-  function! MyPerlSettings()
-    if !did_filetype()
-        set filetype=perl
-    endif
+"  function! MyPerlSettings()
+"    if !did_filetype()
+"        set filetype=perl
+"    endif
 
-    set textwidth=78
-    set expandtab
-    set tabstop=8
-    set shiftwidth=4
-    set cindent
-    set comments=:#
-    set formatoptions=croql
-    set keywordprg=perldoc\ -f
+"    set textwidth=78
+"    set expandtab
+"    set tabstop=8
+"    set shiftwidth=4
+"    set cindent
+"    set comments=:#
+"    set formatoptions=croql
+"    set keywordprg=perldoc\ -f
 
-    noremap <f1> <Esc>:call PerlCWBuffer()<CR><Esc>
-    noremap <f2> <Esc>:close<CR><Esc>
-    noremap <f3> <Esc>:call PerlBuffer()<CR><Esc>
-  endfunction
+"    noremap <f1> <Esc>:call PerlCWBuffer()<CR><Esc>
+"    noremap <f2> <Esc>:close<CR><Esc>
+"    noremap <f3> <Esc>:call PerlBuffer()<CR><Esc>
+"  endfunction
 
   " vim won't auto-recognise some of my perl - force an override with f4
-  noremap <f4> <esc>:call MyPerlSettings()<CR>
+"  noremap <f4> <esc>:call MyPerlSettings()<CR>
 
-  autocmd FileType perl :call MyPerlSettings()
+"  autocmd FileType perl :call MyPerlSettings()
 endif
 
+" Convienient command to see the difference between the current buffer and the
+" file it was loaded from, thus the changes you made.
+" Only define it when not defined already.
+if !exists(":DiffOrig")
+  command DiffOrig vert new | set bt=nofile | r ++edit # | 0d_ | diffthis
+                  \ | wincmd p | diffthis
+endif
+
+" Set tabstop, softtabstop and shiftwidth to the same value
+command! -nargs=* Stab call Stab()
+function! Stab()
+  let l:tabstop = 1 * input('set tabstop = softtabstop = shiftwidth = ')
+  if l:tabstop > 0
+    let &l:sts = l:tabstop
+    let &l:ts = l:tabstop
+    let &l:sw = l:tabstop
+  endif
+  call SummarizeTabs()
+endfunction
+
+function! SummarizeTabs()
+  try
+    echohl ModeMsg
+    echon 'tabstop='.&l:ts
+    echon ' shiftwidth='.&l:sw
+    echon ' softtabstop='.&l:sts
+    if &l:et
+      echon ' expandtab'
+    else
+      echon ' noexpandtab'
+    endif
+  finally
+    echohl None
+  endtry
+endfunction
+
+function! Preserve(command)
+  " Preparation: save last search, and cursor position.
+  let _s=@/
+  let l = line(".")
+  let c = col(".")
+  " Do the business:
+  execute a:command
+  " Clean up: restore previous search history, and cursor position
+  let @/=_s
+  call cursor(l, c)
+endfunction 
+" Remove trailing whitespace from entire file
+nmap _$ :call Preserve("%s/\\s\\+$//e")<CR>
+" Reformat entire file
+nmap _= :call Preserve("normal gg=G")<CR>
+
 "------------------------------------------------------------------------------
-" Don't use Ex mode, use Q for formatting
-map Q gq
+" Search for the current selection
+"------------------------------------------------------------------------------
+function! s:VSetSearch(cmdtype)
+  let temp = @s
+  norm! gv"sy
+  let @/ = '\V' . substitute(escape(@s, a:cmdtype.'\'), '\n', '\\n', 'g')
+  let @s = temp
+endfunction
+
+xnoremap * :<C-u>call <SID>VSetSearch('/')<CR>/<C-R>=@/<CR><CR>
+xnoremap # :<C-u>call <SID>VSetSearch('?')<CR>?<C-R>=@/<CR><CR>
 
 "------------------------------------------------------------------------------
 " Clears search highlighting by just hitting a return
@@ -1391,21 +1564,38 @@ map Q gq
 noremap <CR> :nohlsearch<CR>/<BS><CR>
 
 "------------------------------------------------------------------------------
-" CUA
+" Create %% as a short hand for the path of the active buffer
 "------------------------------------------------------------------------------
-" cut = ^x
-vmap  d
-" copy = ^c
-vmap  y
-" undo = z
-nmap  u
+cnoremap <expr> %% getcmdtype() == ':' ? expand('%:h').'/' : '%%'
 
+"------------------------------------------------------------------------------
+" Navigate the changelist with [c and ]c and
+"          the jump list  with [j and ]j
+"------------------------------------------------------------------------------
+map [c g;
+map ]c g,
+map [j <C-o>
+map ]j <C-i>
 
-if( has("win32"))
-    map ,v :e ~/_vimrc
-else
-    map ,v :e ~/.vimrc
+"------------------------------------------------------------------------------
+" Edit the vimrc file if found with \v
+"------------------------------------------------------------------------------
+let config_vimrc_file = expand( "~/config/vimrc" )
+let have_config_vimrc= filereadable( config_vimrc_file )
+if( have_config_vimrc )
+    map <leader>v :tabedit ~/config/vimrc<CR>
 endif
+
+"------------------------------------------------------------------------------
+" Text Bubbling with CTRL-Up and CTRL-Down using unimpaired.vim
+"------------------------------------------------------------------------------
+" Bubble single lines
+nmap <C-Up> [e
+nmap <C-Down> ]e
+
+" Bubble visual selection
+vmap <C-Up> [egv
+vmap <C-Down> ]egv
 
 " toggle-number
 "if number
@@ -1413,3 +1603,321 @@ endif
 "else
 "    set number
 "endif
+
+"------------------------------------------------------------------------------
+" Neo Vim only mappings
+"------------------------------------------------------------------------------
+if has('nvim')
+  "----------------------------------------------------------------------------
+  " esc in terminal mode to return to normal mode
+  " C-v esc in terminal mode to send an esc to the program running in the term
+  "----------------------------------------------------------------------------
+  tnoremap <Esc> <C-\><C-n>
+  tnoremap <C-v><Esc> <Esc>
+
+  "----------------------------------------------------------------------------
+  " If a program running in a nvim terminal want to use $VISUAL make it use
+  " the existing instance of nvim.
+  "----------------------------------------------------------------------------
+  if executable('nvr')
+    let $VISUAL = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
+  endif
+endif
+
+"------------------------------------------------------------------------------
+" Install and configure plugins
+"------------------------------------------------------------------------------
+" Configure python for nvim
+if has('nvim')
+  if executable('/opt/local/bin/python2.7')
+    let g:python_host_prog = '/opt/local/bin/python2.7'
+  endif
+  if executable('/opt/local/bin/python3')
+    let g:python3_host_prog = '/opt/local/bin/python3'
+  endif
+endif
+
+" if has('packadd')
+"   packadd! matchit
+" endif
+runtime macros/matchit.vim
+
+if has('nvim')
+  if empty(glob('~/.config/nvim/autoload/plug.vim'))
+    silent !curl -flo ~/.config/nvim/autoload/plug.vim --create-dirs
+      \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    autocmd VimEnter * PlugInstall --sync | source $myvimrc
+  endif
+  call plug#begin('~/.config/nvim/plugged')
+elseif has("gui_win32")
+  " Best to create vimfiles/autoload by hand and download plug.vim by hand
+  autocmd vimenter * pluginstall --sync | source $myvimrc
+  call plug#begin('c:/Program Files (86)/Vim/plugged')
+else
+  if empty(glob('~/.vim/autoload/plug.vim'))
+    silent !curl -flo ~/.vim/autoload/plug.vim --create-dirs
+      \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    autocmd vimenter * pluginstall --sync | source $myvimrc
+  endif
+  call plug#begin('~/.vim/plugged')
+endif
+
+"
+" Colors
+"
+Plug 'romainl/Apprentice'
+Plug 'arcticicestudio/nord-vim'
+Plug 'cocopon/iceberg.vim'
+Plug 'nanotech/jellybeans.vim'
+Plug 'NLKNguyen/papercolor-theme'
+Plug 'altercation/vim-colors-solarized'
+Plug 'sheerun/vim-wombat-scheme'
+Plug 'jnurmine/Zenburn'
+"
+" Languages
+"
+Plug 'udalov/kotlin-vim'
+
+Plug 'vim-perl/vim-perl', { 'for': 'perl', 'do': 'make clean carp dancer highlight-all-pragmas moose test-more try-tiny' }
+
+Plug 'vim-perl/vim-perl6', { 'for': 'perl6' }
+
+Plug 'vim-scripts/indentpython.vim', { 'for': 'python' }
+
+if v:version > 703
+  Plug 'fatih/vim-go', { 'for': 'go' }
+endif
+
+Plug 'leafgarland/typescript-vim'
+
+" HTML
+Plug 'mattn/emmet-vim', { 'for': ['html','markdown'] }
+
+"
+" Help
+"
+if has('unix')
+  if has('mac')
+    Plug 'rizzatti/dash.vim'
+  endif
+endif
+
+"
+" Snippets
+"
+if has('python') && (has('nvim') || v:version >= 704)
+  Plug 'SirVer/ultisnips'
+
+  " Trigger configuration.
+  " Do not use <tab> if you use https://github.com/Valloric/YouCompleteMe.
+  let g:UltiSnipsExpandTrigger="<tab>"
+  let g:UltiSnipsJumpForwardTrigger="<c-b>"
+  let g:UltiSnipsJumpBackwardTrigger="<c-z>"
+
+  " If you want :UltiSnipsEdit to split your window.
+  let g:UltiSnipsEditSplit="vertical"
+endif
+
+Plug 'honza/vim-snippets'
+
+
+if (has('nvim') || v:version >= 800)
+  Plug 'w0rp/ale'
+else
+  Plug 'scrooloose/syntastic'
+endif
+
+Plug 'editorconfig/editorconfig-vim'
+
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-dispatch'
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-projectionist'
+Plug 'tpope/vim-repeat'
+Plug 'tpope/vim-unimpaired'
+Plug 'mhinz/vim-grepper'
+Plug 'machakann/vim-highlightedyank'
+Plug 'godlygeek/tabular'
+Plug 'scrooloose/nerdtree'
+
+if has('nvim')
+  Plug 'radenling/vim-dispatch-neovim'
+endif
+
+call plug#end()
+" Plugin 'Chiel92/vim-autoformat          
+"// Plugin 'ctrlpvim/ctrlp.vim'             "-> Atom default
+" Plugin 'Valloric/YouCompleteMe'         "-> Atom default
+" Plugin 'vim-airline/vim-airline'        "-> Atom default
+" Plugin 'vim-airline/vim-airline-themes' "-> Atom default
+" Plugin 'tpope/vim-fugitive'             "-> https://atom.io/packages/git-plus
+" Plugin 'tpope/vim-commentary'           "-> Atom default Ctrl-/ (feel free to change this)
+" Plugin 'tpope/vim-surround'             "-> Don't use it often but https://atom.io/packages/vim-surround
+" Plugin 'pangloss/vim-javascript'        "-> Atom default
+" Plugin 'mattn/emmet-vim'                "-> https://atom.io/packages/emmet
+" Plugin 'kchmck/vim-coffee-script'       "-> Atom default(for obvious reasons)
+" Plugin 'majutsushi/tagbar'              "-> https://atom.io/packages/symbols-tree-view
+" Plugin 'elzr/vim-json'                  "-> Atom default
+" Plugin 'SearchComplete'                 "-> Not sure yet
+" Plugin 'ap/vim-css-color'               "-> https://atom.io/packages/pigments
+" Plugin 'ryanoasis/vim-devicons'         "-> https://atom.io/packages/seti-icons
+" Plugin 'terryma/vim-multiple-cursors'   "-> https://atom.io/packages/multi-cursor haven't used
+" Plugin 'scrooloose/syntastic'           "-> Atom default
+" Plugin 'pedsm/vim-paragraph'            "-> Atom default
+" Plugin 'SirVer/ultisnips'               "-> Atom default
+" Plugin 'honza/vim-snippets'             "-> Atom default
+" Plugin 'editorconfig/editorconfig-vim'  "-> https://atom.io/packages/editorconfig
+" " Vim 8.0 territory
+" Plugin 'skywind3000/asyncrun.vim'       "-> https://atom.io/packages/terminal-plus
+" Plugin 'pedsm/sprint'                   "-> I will make an atom version one day
+" Plugin 'metakirby5/codi.vim'            "-> Not sure
+"------------------------------------------------------------------------------
+" Colors
+"------------------------------------------------------------------------------
+" Use colors that look good on our background
+if has( 'gui_running' )
+    set background=light
+    
+    " let solarized_file = expand( "~/.vim/colors/solarized.vim" )
+    " let have_solarized = filereadable( solarized_file )
+
+    " if !have_solarized
+    "     let solarized_file = expand( "$VIM/vimfiles/colors/solarized.vim" ) 
+    "     let have_solarized = filereadable( solarized_file )
+    " endif
+
+    if !has("win32")
+        colorscheme solarized
+    elseif has("win32")
+        colorscheme wombat
+    endif
+elseif $COLORTERM == 'truecolor'
+    if has("termguicolors")
+        set termguicolors
+        colorscheme PaperColor
+        set background=dark
+    else
+        set t_Co=256
+    endif
+elseif &term=="xterm-256color"
+    set t_Co=256
+elseif &term=="xterm"
+	set t_RV=          " don't check terminal version
+	set t_Co=8
+	set t_Sb=^[4%dm
+	set t_Sf=^[3%dm
+endif
+
+
+" Allow color schemes to do bright colors without forcing bold.
+if &t_Co == 8 && $TERM !~# '^linux\|^Eterm'
+  set t_Co=16
+endif
+
+"------------------------------------------------------------------------------
+" Dash
+"------------------------------------------------------------------------------
+" :Dash with cursor on keyword
+" :Dash {keyword} uses file type of buffer
+" :Dash {keyword} {docset}
+
+"------------------------------------------------------------------------------
+" EditorConfig
+"------------------------------------------------------------------------------
+let g:EditorConfig_exclude_patterns = ['fugitive://.*']
+
+"------------------------------------------------------------------------------
+" Emmet
+"------------------------------------------------------------------------------
+let g:user_emmet_leader_key='<C-A>'
+
+"------------------------------------------------------------------------------
+" Grepper   
+"------------------------------------------------------------------------------
+let g:grepper = {}
+let g:grepper.tools = ['grep', 'git', 'rg']
+
+" Search for the current word
+nnoremap <leader>g :Grepper -tool rg -cword -noprompt<CR>
+
+" Search for the current selection
+"  gse will search for the text from the cursor to the end of the word
+nmap gs <plug>(GrepperOperator)
+vmap gs <plug>(GrepperOperator)
+
+"------------------------------------------------------------------------------
+" NerdTree
+"------------------------------------------------------------------------------
+map <f2> :NERDTreeToggle<CR>
+
+"------------------------------------------------------------------------------
+" Ale / Syntastic
+"------------------------------------------------------------------------------
+if (has('nvim') || v:version >= 800)
+  let g:ale_linters = {
+  \ 'javascript': ['eslint'],
+  \ }
+
+  " Mappings in the style of unimpaired
+  nmap <silent> [W <Plug>(ale_first)
+  nmap <silent> [w <Plug>(ale_previous)
+  nmap <silent> ]w <Plug>(ale_next)
+  nmap <silent> ]W <Plug>(ale_last)
+
+  let g:ale_lint_on_text_changed = 'always' " default
+  let g:ale_lint_on_save = 1                " default
+  let g:ale_lint_on_enter = 1               " default
+  let g:ale_lint_on_filetype_changed = 1    " default
+  "let g:ale_sign_column_always = 1
+else
+  set statusline+=%#warningmsg#
+  set statusline+=%{SyntasticStatuslineFlag()}
+  set statusline+=%*
+
+  let g:syntastic_always_populate_loc_list = 1
+  let g:syntastic_auto_loc_list = 1
+  let g:syntastic_check_on_open = 1
+  let g:syntastic_check_on_wq = 1
+  "let g:syntastic_loc_list_height = 5
+  "let g:syntastic_auto_loc_list = 0
+
+  " asciidoc
+  let g:syntastic_asciidoc_checkers = ['asciidoc']
+
+  " c       
+  let g:syntastic_c_checkers = ['gcc']
+  "let g:syntastic_c_compiler = 'gcc'
+  "let g:syntastic_c_compiler = 'clang'
+  "let g:syntastic_c_remove_include_errors = 1
+  "let g:syntastic_c_compiler_options = '-std=c99'
+  "let g:syntastic_c_config_file = '~/config/syntastic_c.cfg
+  "let g:syntastic_c_include_dirs = ["/opt/local/include","/usr/local/include","/usr/include"]
+  "let b:syntastic_c_cflags = '-pedantic -Wall'
+
+  " c++       
+  let g:syntastic_cpp_checkers = ['gcc']
+
+  " html
+  let g:syntastic_html_checkers = ['tidy']
+
+
+  " java       
+  let g:syntastic_java_checkers = ['checkstyle']
+  let g:syntastic_java_checkstyle_classpath = "/usr/local/checkstyle-8.7/checkstyle-8.7-all.jar"
+  let g:syntastic_java_checkstyle_conf_file = "~/config/checkstyle.xml"
+
+  " perl5
+  let g:syntastic_perl_checkers = ['perl']
+  let g:syntastic_enable_perl_checker = 1
+
+  " perl6
+  let g:syntastic_perl6_checkers = ['perl6']
+  let g:syntastic_enable_perl6_checker = 1
+  "let g:syntastic_perl6_lib_path = []
+
+  " sh
+  let g:syntastic_sh_checkers = ['sh']
+
+  let g:syntastic_typescript_checkers = ['tslint']
+endif
+

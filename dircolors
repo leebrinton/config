@@ -7,49 +7,29 @@
 # Below, there should be one TERM entry for each termtype that is colorizable
 TERM Eterm
 TERM ansi
-TERM color-xterm
-TERM con132x25
-TERM con132x30
-TERM con132x43
-TERM con132x60
-TERM con80x25
-TERM con80x28
-TERM con80x30
-TERM con80x43
-TERM con80x50
-TERM con80x60
+TERM *color*
+TERM con[0-9]*x[0-9]*
 TERM cons25
 TERM console
 TERM cygwin
 TERM dtterm
 TERM eterm-color
 TERM gnome
-TERM gnome-256color
+TERM hurd
+TERM jfbterm
 TERM konsole
 TERM kterm
 TERM linux
 TERM linux-c
-TERM mach-color
 TERM mlterm
 TERM putty
-TERM rxvt
-TERM rxvt-cygwin
-TERM rxvt-cygwin-native
-TERM rxvt-unicode
-TERM screen
-TERM screen-256color
-TERM screen-bce
-TERM screen-w
-TERM screen.linux
+TERM rxvt*
+TERM screen*
+TERM st
+TERM terminator
+TERM tmux*
 TERM vt100
-TERM vt220
-TERM xterm
-TERM xterm-16color
-TERM xterm-256color
-TERM xterm-88color
-TERM xterm-color
-TERM xterm-debian
-TERM xterm-xfree86
+TERM xterm*
 
 EIGHTBIT 1
 # Below are the color init strings for the basic file types. A color init
@@ -62,29 +42,21 @@ EIGHTBIT 1
 # 40=black 41=red 42=green 43=yellow 44=blue 45=magenta 46=cyan 47=white
 NORMAL 00       # global default, although everything should be something.
 FILE   00       # normal file				(white)
+RESET  0        # reset to "normal" color
 DIR    01;34	# directory     			(bold:blue)
-LINK   00;33	# symbolic link				(cyan)
-FIFO   00;33	# pipe					(yellow)
-SOCK   00;35	# socket				(yellow)
-BLK    01;32	# block device driver			(bright green)
-CHR    01;32	# character device driver		(bright green)
-ORPHAN 05;31	# symlink to nonexistent file		(binking red)
+LINK   00;36	# symbolic link				(cyan)
+FIFO   40;33	# pipe					(yellow:black)
+SOCK   01;35	# socket				(bold:magenta)
+DOOR   01;35    # door                                  (bold:magenta)
+BLK    01;32	# block device driver			(bold:green)
+CHR    01;32	# character device driver		(bold:green)
+ORPHAN 05;31	# symlink to nonexistent file		(binking:red)
+SETUID 37;41    # file that is setuid (u+s)             (white:red)
+SETGID 30;43    # file that is setgid (g+s)              (black:yellow)
+STICKY 37;44    # dir with sticky bit set (+t) and not other writable
+OTHER_WRITABLE 34;42        # dir that is other writable and not sticky
+STICKY_OTHER_WRITABLE 30;42 # dir that is sticky and other writable (+t, o+w)
 
-#NORMAL 00       # global default, although everything should be something.
-#FILE   00       # normal file				(white)
-#DIR    01;34	# directory     			(bold:blue)
-#LINK   01;36	# symbolic link				(bold:cyan)
-#FIFO   40;33	# pipe					(black:yellow)
-#SOCK   01;35	# socket				(bold:magenta)
-#DOOR   01;35   # door                                  (bold:magenta)
-#BLK    40;33	# block device driver			(black:yellow)
-#CHR    40;33	# character device driver		(black:yellow)
-#ORPHAN 40;33;01 # symlink to nonexistent file		(bold black:yellow)
-#SETUID 37;41   # file that is setuid (u+s)             (white:red)
-#SETGID 30;43   # file that is setgid (g+s)             (black:yellow)
-#STICKY_OTHER_WRITABLE # 30;42 # dir that is sticky and other writable (+t, o+w)
-#OTHER_WRITABLE 34;42  # dir that is other writable and not sticky
-#STICK  37;44          # dir with sticky bit set (+t) and not other writable
 # This is for files with execute permission:
 EXEC 00;32	# (green)
 
@@ -98,24 +70,49 @@ EXEC 00;32	# (green)
 .com 00:32
 .bat 00;32
 
-.tar 00;31 # archives or compressed (red)
-.tgz 00;31
-.bz2 00;31
-.arj 00;31
-.taz 00;31
-.lzh 00;31
-.zip 00;31
-.z   00;31
-.Z   00;31
-.gz  00;31
-.deb 00;31
-.jar 00;31
-.war 00;31
-.ear 00;31
-.rar 00;31
+.ace  00;31 # archives or compressed (red)
+.alz  00;31
+.arc  00;31
+.arj  00;31
+.bz   00;31
+.bz2  00;31
+.cab  00;31
 .cpio 00;31
-.7z 00;31
-.rz 00;31
+.deb  00;31
+.dz   00;31
+.ear  00;31
+.gz   00;31
+.jar  00;31
+.lha  00;31
+.lrz  00;31
+.lz   00;31
+.lzh  00;31
+.lzma 00;31
+.lzo  00;31
+.lz4  00;31
+.rar  00;31
+.rpm  00;31
+.rz   00;31
+.sar  00;31
+.tar  00;31
+.taz  00;31
+.tbz  00;31
+.tbz2 00;31
+.tgz  00;31
+.tlz  00;31
+.txz  00;31
+.tz   00;31
+.tzo  00;31
+.tzst 00;31
+.t7z  00;31
+.xz   00;31
+.z    00;31
+.Z    00;31
+.zip  00;31
+.zoo  00;31
+.zst  00;31
+.war  00;31
+.7z   00;31
 
 #.jpg 01;35 # image formats
 #.gif 01;35

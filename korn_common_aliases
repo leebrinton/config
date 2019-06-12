@@ -1,4 +1,4 @@
-###############################################################################
+##### vim:set filetype=sh : ###################################################
 # 
 # korn-common-aliases
 #
@@ -17,34 +17,37 @@ alias cls=clear
 # darwin, BSDs, and Sun do not
 #------------------------------------------------------------------------------
 case $(uname) in
-  Linux*) alias ls='ls -F --color=auto';;  # Use colors
-  CYGWIN*) alias ls='ls -F --color=auto';; # Use colors
-  MINGW*) alias ls='ls -F --color=auto';;  # Use colors
-  *) alias ls='ls -F';;
+  Linux*) alias ls='ls -hF --color=auto';;  # Use colors
+  CYGWIN*) alias ls='ls -hF --color=auto';; # Use colors
+  MINGW*) alias ls='ls -hF --color=auto';;  # Use colors
+  MSYS*) alias ls='ls -hF --color=auto';;   # Use colors
+  *) alias ls='ls -hF';;
 esac
 
 alias l='ls -CF'                         # shorthand for list
-alias ll='ls -lh'                        # shorthand for long list
+alias ll='ls -l'                         # shorthand for long list
+alias lsc='ls -adl'                      # ls config files 'lsc .*'
+alias lsd='ls -dl'                       # ls directory 
 
-if [ -x /usr/bin/d ]
-then
-  alias lsd='d'
-else
-  alias lsd='ls -ldh'
-fi
+# Interactive operation...
+# alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
 
 alias du='du -h'
 alias df='df -h'
 alias hup='kill -HUP'
 
-alias cgrep='grep --color=auto'
-alias cfgrep='fgrep --color=auto'
-alias cegrep='egrep --color=auto'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
 
 case $(uname) in
   Darwin*) alias top='top -o cpu';;         # Sort top display by cpu usage
   *[bB][sS][dD]*) alias top='top -o cpu';;  # Sort top display by cpu usage
 esac
+
+alias ed='ed -p\*'
 
 ###############################################################################
 # end of korn_common_aliases

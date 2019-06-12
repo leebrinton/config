@@ -1,14 +1,55 @@
-###############################################################################
+##### vim:set filetype=sh : ###################################################
 #
 # bash_functions - Bash initializtion file to define functions
 #
 ###############################################################################
+#---------------------------------------------------------------------------
+# settitle - set terminal window title
+#---------------------------------------------------------------------------
+function settitle () {
+  echo -ne "\e]2;$@\a\e]1;$@\a";
+}
+
+#---------------------------------------------------------------------------
+# oni - Start an instance of the oni editor
+#---------------------------------------------------------------------------
+function oni() {
+    local prg
+
+    if [ -x /opt/local/bin/nvim ]
+    then
+        export ONI_NEOVIM_PATH='/opt/local/bin/nvim'
+    fi
+
+    if [ -x /Applications/Oni.app/Contents/Resources/app/oni.sh ]
+    then
+        prg='/Applications/Oni.app/Contents/Resources/app/oni.sh'
+    fi
+    echo "ONI_NEOVIM_PATH: [$ONI_NEOVIM_PATH]"
+    echo "[$prg]"
+    command $prg $@
+}
+
+#---------------------------------------------------------------------------
+# emacs - Start an instance of the emacs editor
+#---------------------------------------------------------------------------
 function emacs() {
   local prg
-
-  if [ "${RUNNING_CYGWIN}" = 'true' -o "$RUNNING_MINGW" = 'true' ]
+  if [ "${RUNNING_CYGWIN}" = 'true' -o "${RUNNING_MSYS2_BASED_ENV}" = 'true' ]
   then
-    prg="${EMACSHOME}/bin/runemacs"
+      if [ -x /usr/bin/emacs ]
+      then
+          prg=emacs
+      elif [ -n "${EMACSHOME}" ]
+      then
+          prg="${EMACSHOME}/bin/runemacs"
+      elif [ -x /mingw32/bin/emacs ]
+      then
+          prg=/mingw32/bin/emacs
+      elif [ -x /mingw64/bin/emacs ]
+      then
+          prg=/mingw64/bin/emacs
+      fi
   elif [ "${RUNNING_DARWIN}" = 'true' ]
   then
     prg=/Applications/MacPorts/Emacs.app/Contents/MacOS/Emacs
@@ -157,38 +198,65 @@ function cpdir() {
 # make all cd command use pushd 
 #-----------------------------------------------------------------------------
 function cd() {
-    if [ $# -lt 1 ]
-    then
-        eval $(echo "pushd '${HOME}' > /dev/null")
-    else
-        local d
+    # if [ $# -lt 1 ]
+    # then
+    #     eval $(echo "pushd '${HOME}' > /dev/null")
+    # else
+    #     local d
 
-        for d in "$@"
-        do
-            eval $(echo "pushd '${d}' > /dev/null")
-        done
+    #     for d in "$@"
+    #     do
+    #         eval $(echo "pushd '${d}' > /dev/null")
+    #     done
+    # fi
+
+    local x2 the_new_dir adir index
+    local -i cnt
+
+    if [[ $1 ==  "--" ]]; then
+        dirs -v
+        return 0
     fi
-}
 
-#-----------------------------------------------------------------------------
-# sd
-# select directory from dirs
-#------------------------------------------------------------------------------
-function sd() {
-    local selection
-    PS3='directory (0 to stay put)? '
-    
-    select selection in $(dirs)
-    do
-        if [ ${selection} ]
-        then
-            cd ${selection}
-            break
-        else
-            echo 'Staying put.'
-            break
+    the_new_dir=$1
+    [[ -z $1 ]] && the_new_dir=$HOME
+
+    if [[ ${the_new_dir:0:1} == '-' ]]; then
+        #
+        # Extract dir N from dirs
+        index=${the_new_dir:1}
+        [[ -z $index ]] && index=1
+        adir=$(dirs +$index)
+        [[ -z $adir ]] && return 1
+        the_new_dir=$adir
+    fi
+
+    #
+    # '~' has to be substituted by ${HOME}
+    [[ ${the_new_dir:0:1} == '~' ]] && the_new_dir="${HOME}${the_new_dir:1}"
+
+    #
+    # Now change to the new dir and add to the top of the stack
+    pushd "${the_new_dir}" > /dev/null
+    [[ $? -ne 0 ]] && return 1
+    the_new_dir=$(pwd)
+
+    #
+    # Trim down everything beyond 11th entry
+    popd -n +11 2>/dev/null 1>/dev/null
+
+    #
+    # Remove any other occurence of this dir, skipping the top of the stack
+    for ((cnt=1; cnt <= 10; cnt++)); do
+        x2=$(dirs +${cnt} 2>/dev/null)
+        [[ $? -ne 0 ]] && return 0
+        [[ ${x2:0:1} == '~' ]] && x2="${HOME}${x2:1}"
+        if [[ "${x2}" == "${the_new_dir}" ]]; then
+            popd -n +$cnt 2>/dev/null 1>/dev/null
+            cnt=cnt-1
         fi
     done
+    return 0
 }
 
 #------------------------------------------------------------------------------

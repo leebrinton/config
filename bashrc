@@ -1,4 +1,4 @@
-###############################################################################
+##### vim:set filetype=sh : ###################################################
 #
 # ~/config/bashrc 
 #
@@ -15,8 +15,11 @@
 #------------------------------------------------------------------------------
 # If not running interactively, don't do anything
 #------------------------------------------------------------------------------
-[ -z "$PS1" ] && return
+[[ "$-" != *i* ]] && return
 
+#------------------------------------------------------------------------------
+# Initialize ANSI escape sequences for colors
+#------------------------------------------------------------------------------
 if [[ -f "${HOME}/bin/ansicolor.sh" ]]
 then
   source "${HOME}/bin/ansicolor.sh"
@@ -86,7 +89,7 @@ shopt -s expand_aliases
 shopt -s extglob
 
 #------------------------------------------------------------------------------
-# Append to the hsitory file instead of overwriting it
+# Append to the history file instead of overwriting it
 #------------------------------------------------------------------------------
 shopt -s histappend
 
@@ -135,7 +138,7 @@ shopt -u nocaseglob
 # Do not expand filename patterns with no matchs to the null string
 #------------------------------------------------------------------------------
 shopt -u nullglob
-# this is in version 3.0 shopt -s failglob
+shopt -s failglob
 
 #------------------------------------------------------------------------------
 # Enable programmable completion
@@ -236,9 +239,8 @@ export HISTCONTROL HISTFILE HISTFILESIZE
 #------------------------------------------------------------------------------
 # Set the main prompt variable 
 #------------------------------------------------------------------------------
-PS1='\[${greenf}\]\u@\h \[${yellowf}\]\w \[${cyanf}\]\D{%a %b %d %I:%M:%S}\[${reset}\] (\!)\n\$ '
-  # Even deeper, only show basename of pwd
-  #PS1='${greenf}\u@\h ${yellowf}\W${reset} (\#)\n\$ '
+ [[ "$RUNNING_MSYS2_BASED_ENV" != 'true' ]] && \
+  PS1='\[${greenf}\]\u@\h \[${yellowf}\]\w \[${cyanf}\]\D{%a %b %d %I:%M:%S}\[${reset}\] (\!)\n\$ '
 
 #------------------------------------------------------------------------------
 # Set the PROMPT_COMMAND variable 
@@ -252,22 +254,44 @@ then
   PROMPT_COMMAND='echo -ne "$TITLE"'
 fi
 
-#------------------------------------------------------------------------------
+#==============================================================================
 # Enable programmable completion
+#==============================================================================
 #------------------------------------------------------------------------------
-if [[ -f /etc/bash_completion ]]
+# Define to avoid stripping description in
+# --option=description of './configure --help'
+#------------------------------------------------------------------------------
+COMP_CONFIGURE_HINTS=1
+
+#------------------------------------------------------------------------------
+# Define to avoid flattening internal contents of tar files
+#------------------------------------------------------------------------------
+COMP_TAR_INTERNAL_PATHS=1
+
+if [[ -f /usr/share/bash-completion/bash_completion ]]
 then
-  source /etc/bash_completion
+  BASH_COMPLETION=/usr/share/bash-completion/bash_completion
+elif [[ -f /etc/bash_completion ]]
+then
+  BASH_COMPLETION=/etc/bash_completion
 elif [[ -f /usr/local/etc/bash_completion ]]
 then
-  export BASH_COMPLETION=/usr/local/etc/bash_completion
-  export BASH_COMPLETION_DIR=/usr/local/etc/bash_completion.d
-  source "$BASH_COMPLETION"
+  BASH_COMPLETION=/usr/local/etc/bash_completion
+
+  if [[ -d /usr/local/etc/bash_competion.d ]]
+  then
+    BASH_COMPLETION_DIR=/usr/local/etc/bash_completion.d
+  fi
 elif [[ -f /opt/local/etc/bash_completion ]]
 then
-  export BASH_COMPLETION=/opt/local/etc/bash_completion
-  source "$BASH_COMPLETION"
+  BASH_COMPLETION=/opt/local/etc/bash_completion
 fi
+
+# If this shell is interactive, turn on programmable completion enhancements.
+# Any completions you add in ~/.bash_completion are sourced last.
+case $- in
+  *i*) [[ -n $BASH_COMPLETION ]] && . $BASH_COMPLETION ;;
+esac
 
 #------------------------------------------------------------------------------
 # Aliases
@@ -275,6 +299,18 @@ fi
 if [[ -f "${HOME}/config/bash_aliases" ]]
 then
   source "${HOME}/config/bash_aliases"
+fi
+
+if [[ -x /usr/bin/mint-fortune ]]
+then
+  /usr/bin/mint-fortune
+fi
+
+# THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="${HOME}/.sdkman"
+if [[ -s "${SDKMAN_DIR}/bin/sdkman-init.sh" ]]
+then
+  source "${SDKMAN_DIR}/bin/sdkman-init.sh"
 fi
 
 ###############################################################################

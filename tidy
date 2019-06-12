@@ -8,11 +8,9 @@ literal-attributes: yes
 logical-emphasis: yes
 replace-color: yes
 word-2000: yes
-accessibility-check: 3
 indent: auto
 indent-attributes: yes
 vertical-space: yes
 wrap: 78
 wrap-attributes: yes
-language: en
 tidy-mark: yes

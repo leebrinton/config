@@ -29,6 +29,7 @@ Block Elements
 
 > Blockquote text
 > > Nested blockquote
+> txet etouqkcolb
 
 ### Lists
 
@@ -36,19 +37,25 @@ Block Elements
 * unordered list item2
 * unordered list item3
 
-+ unordered list item1
-+ unordered list item2
-+ unordered list item3
-
 - unordered list item1
 - unordered list item2
 - unordered list item3
+
++ unordered list item1
++ unordered list item2
++ unordered list item3
 
 1. ordered list item1
 2. ordered list item2
 3. ordered list item3
 
 ### Code Blocks
+
+```c
+for (i = 0; i < num; i++) {
+    process(i);
+}
+```
 
 Text indented 4 spaces of 1 tab is a codeblock.
 
@@ -141,3 +148,50 @@ _     | underscore          |
 [^MultiMarkdown]
 
 [^MultiMarkdown]: This uses a MultiMarkdown extention to the Markdown language
+
+GFM (Github Flavered Markdown)
+------------------------------
+
+### Task lists
+
+- [x] This is a completed item
+- [ ] This is a incomplete item
+
+### SHA references
+
+<p>Any reference to a commit’s SHA-1 hash will be automatically converted
+  into a link to that commit on GitHub:</p>
+
+```
+4ad0c921206dec4d1518f4aeead932e7617f934f
+denysdovhan/how-to-markdowkn@4ad0c921206dec4d1518f4aeead932e7617f934f
+```
+
+### Issue and Pull request references
+
+<p>Any number that refers to an Issue or Pull Request will be automatically
+converted into a link:</p>
+
+```
+#1
+denysdovhan/how-to-markdowkn#1
+```
+
+ ### Username @mentions
+
+<p>Typing an @ symbol, followed by a username, will notify that person to
+  come and view the comment. This is called a @mention, because you’re
+  mentioning the individual. You can also mention @teams within an
+  organization.</p>
+
+ ### Emoji
+
+It's a funny part, but it's still important. GFM also supports emoji!
+
+```
+  ✨ 🐫 💥
+```
+
+To see a list of every emoji that is supported, check out the [Emoji Cheat
+Sheet](http://www.emoji-cheat-sheet.com/).
+

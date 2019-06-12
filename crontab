@@ -1,0 +1,12 @@
+# *    *    *    *    *  command to be executed
+# ┬    ┬    ┬    ┬    ┬
+# │    │    │    │    │
+# │    │    │    │    │
+# │    │    │    │    └───── day of week (0 - 7) (0 or 7 are Sunday, or use names)
+# │    │    │    └────────── month (1 - 12)
+# │    │    └─────────────── day of month (1 - 31)
+# │    └──────────────────── hour (0 - 23)
+# └───────────────────────── min (0 - 59)
+
+0 * * * * cd /Users/lbrinton/dev && /Users/lbrinton/bin/sesco_findsrc > /Users/lbrinton/sesco_src_files && /opt/local/bin/gtags -f /Users/lbrinton/sesco_src_files
+

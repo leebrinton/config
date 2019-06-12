@@ -1,0 +1,16 @@
+PRAGMA foreign_keys=OFF;
+BEGIN TRANSACTION;
+CREATE TABLE tagsIndex(tid INTEGER, sid INTEGER);
+CREATE TABLE snippets(sid INTEGER PRIMARY KEY, title TEXT, body TEXT, syntax VARCHAR(20), usageCount INTEGER, FOREIGN KEY(sid) REFERENCES tagsIndex(sid) ON DELETE CASCADE ON UPDATE CASCADE);
+INSERT INTO snippets VALUES(1,'`main',replace('public static void main( String[] args )\n{\n}','\n',char(10)),'Java',0);
+INSERT INTO snippets VALUES(2,'`fori',replace('for (int i = 0; i < __limit__; i++) {\n}','\n',char(10)),'Java',0);
+INSERT INTO snippets VALUES(3,'`foro',replace('for (__type__ __var__ : __collection__) {\n}','\n',char(10)),'Java',0);
+INSERT INTO snippets VALUES(4,'`println','System.out.println( __text__ );','Java',0);
+INSERT INTO snippets VALUES(5,'`printf','System.out.printf( "__format__", __arg__ );','Java',0);
+INSERT INTO snippets VALUES(6,'`sformat','String.format( "__format__", __arg__ ); ','Java',0);
+INSERT INTO snippets VALUES(7,'''testclass',replace('public class Test__class__ extends TestCase\n{\n    protected void setUp()\n    {\n    }\n}\n','\n',char(10)),'Java',0);
+INSERT INTO snippets VALUES(8,'''debug',replace('if (s_logger.isDebugEnabled()) {\n    s_logger.debug();\n}','\n',char(10)),'Java',0);
+INSERT INTO snippets VALUES(9,'''info',replace('if (s_logger.isInfoEnabled()) {\n    s_logger.info();\n}\n','\n',char(10)),'Java',0);
+CREATE TABLE tags(tid INTEGER PRIMARY KEY, tag TEXT UNIQUE, FOREIGN KEY(tid) REFERENCES tagsIndex(tid) ON DELETE CASCADE ON UPDATE CASCADE);
+CREATE TABLE smartTags(stid INTEGER PRIMARY KEY, name TEXT, query TEXT);
+COMMIT;

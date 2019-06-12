@@ -1,0 +1,102 @@
+Title: Intellij Idea config
+
+# Intellij Idea config #
+
+* modify /Applications/{intellij.app}/Contents/Info.plist:
+    * `<key>VMOptions.x86_64</key>`
+    * `<string>...</string>`
+    * `-Xmx1g -XX:MaxPermSize=350m`
+
+* for version 12 modify ~Library/Preferences/IdeaIC12/idea.vmoptions
+    * `-Xms512m`
+    * `-Xmx2048m`
+    * `-XX:MaxPermSize=512m`
+    * `-XX:ReservedCodeCacheSize=128m`
+    * `-XX:+UseCodeCacheFlushing`
+    * `-XX:+UseCompressedOops`
+
+
+<mac><F1>           | Show error description
+<mac><F12>          | Show file structure
+<mac>-1             | Project Tool
+<mac>-2             | Favorites
+<mac>-4             | Run
+<mac>-5             | Debug
+<mac>-9             | Version Control Tool
+<mac>-/             | Toggle comments
+
+<alt>-/             | Hippie Completion (Cyclic Expand Word)
+<alt><return>       | Show intention actions and quick fixes
+<alt><shift><right> | Word selection to the right
+<alt><shift><left>  | Word selection to the left
+
+<alt><shift><up>    | Move current line up
+<alt><shift><down>  | Move current line down
+<mac><shift><up>    | Move block up
+<mac><shift><down>  | Move block down
+
+<mac><minus>        | Collapse fold
+<mac><plus>         | Expand fold
+<mac><shift><minus> | Collapse all folds
+<mac><shift><plus>  | Expand all folds
+
+<mac><shift><return>| Complete statement
+
+<mac>-a             | Select entire buffer
+<mac>-b             | Jump to declaration
+<mac>-d             | Duplicate line(s)
+<mac>-f             | Find selected text in file <F3>/<shift><F3> next/prev
+<mac><shift>-i      | Show definition of the symbol at the caret
+<mac>-o             | Navagate -> Class 
+<mac><shift>-o      | Navagate -> File
+<mac>-p             | Show method signature (parameter info)
+<mac>-w             | Select progressivly larger block
+<mac><shift>-w      | Shrink selection block
+<mac>-y             | Delete line
+<mac>-z             | Undo
+
+<mac><shift><F7>    | Highlight all usages of the symbol at the caret in file
+
+<mac><alt>-b        | Jump to implementation(s)
+<mac><alt>-c        | Extract constant
+<mac><alt>-l        | Reformat
+<mac><alt>-m        | Extract method
+<mac>-n             |       
+<mac><alt>-p        | Extract parameter
+<mac><alt>-t        | Surround with ...
+<mac><alt>-v        | Extract variable
+
+<ctrl>-j            | Show documentation for the symbol at the caret
+<ctrl><space>       | Basic completion
+<ctrl><space> x 2   | Deeper completion
+<ctrl><shift><space>| Smart Type completion
+
+<F2>                | Goto next error
+<F4>                | View source
+<shift><F6>         | Rename symbol
+
+## Completion ##
+This is the way I found to make the word completion work with CTRL-N and CTRL-P, while still having the shortcuts work for DOWN and UP in lists.
+
+In Settings -> Keymap, map CTRL-N and CTRL-P to Down and Up respectively. Then, in the Other Settings -> Vim Emulation, set CTRL-N and CTRL-P handlers to Vim.
+
+Finally, add the following to your .ideavimrc
+
+imap <C-n> <ESC>:action HippieCompletion<CR>a
+imap <C-p> <ESC>:action HippieBackwardCompletion<CR>a
+
+<ctrl><space>       | Basic completion
+<ctrl><space> x 2   | Deeper completion
+<ctrl><shift><space>| Smart Type completion (filters by expected type)
+<mac><shift><return>| Complete statement
+
+## Documentation / Info
+<mac>-p             | Show method signature (parameter info)
+<mac><shift>-d      | Dash smart search for Symbol at caret or selection
+<ctrl>-j            | Show documentation for the symbol at the caret
+<mac> + mouse over  | Brief info
+<mac><F1>           | Show description of error or warning at caret
+
+
+
+

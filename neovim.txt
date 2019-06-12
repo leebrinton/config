@@ -1,0 +1,5 @@
+mkdir .config/nvim
+ln -s ~/config/init.vim ~/.config/nvim/init.vim
+
+pip3 install --user --upgrade neovim
+pip3 install --user --upgrade neovim-remote

@@ -1,0 +1,45 @@
+Create ~/.hgrc
+
+[ui]
+username = Lee Brinton <leebrinton@gmail.com>
+ignore = ~/config/hgignore
+
+
+New Project
+
+From parent of project dir:  hg init <project>
+
+cd project
+...
+hg add <file1>
+hg commit
+
+OR
+
+cd <project>
+
+hg init
+hg add <file1>
+hg commit
+
+login to bitbucket.org brinton@comcast.net/Sp1tf1r3
+create the project repositiry
+hg push https://leebrinton@bitbucket.org/leebrinton/<project>
+
+create <project>/.hg/hgrc
+
+[paths]
+default = https://leebrinton@bitbucket.org/leebrinton/<project>
+
+hg incoming [remote-repo]    Listchangesets available
+hg clone https://leebrinton@bitbucket.org/leebrinton/<project>
+
+
+To compare local and default remote:
+hg summary --remote
+
+hg pull         Pull all new changesets into local
+hg pull -u      Pull all new changesets into local and update working copy
+hg pull -r [remote-repo]
+hg update
+

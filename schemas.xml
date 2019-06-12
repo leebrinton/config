@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<locatingRules xmlns="http://thaiopensource.com/ns/locating-rules/1.0">
+  <uri pattern="*.plist" uri="../../../usr/local/share/xml/apple/rnc/PropertyList-1.0.rnc"/>
+  <uri pattern="*.build" uri="../../../usr/local/share/xml/nant/rnc/nant.rnc"/>
+  <documentElement localName="project" uri="../../../usr/local/share/xml/ant/rnc/ant.rnc"/>
+  <namespace ns="http://jakarta.apache.org/log4j/" uri="../../../usr/local/share/xml/log4j/rnc/log4j.rnc"/>
+  <namespace ns="http://docbook.org/ns/docbook" uri="../../../opt/local/share/xml/docbook/5.0/rng/docbook.rnc"/>
+  <namespace ns="http://www.w3.org/1999/xlink" uri="../../../usr/local/share/xml/xlink/rnc/xlink1_1.rnc"/>
+  <documentElement localName="module" uri="../../../usr/local/share/xml/gwt/rnc/gwt-module.rnc"/>
+   <namespace ns="http://www.w3.org/1999/xhtml" typeId="XHTML5"/>
+   <uri pattern="*.html" typeId="HTML5"/>
+   <uri pattern="*.xhtml" typeId="XHTML5"/>
+   <documentElement localName="html" typeId="HTML5"/>
+   <typeId id="XHTML5" uri="../../../usr/local/share/xml/html5/rncr/xhtml5.rnc"/>
+   <typeId id="HTML5" uri="../../../usr/local/share/xml/html5/rnc/html5.rnc"/>
+</locatingRules>

@@ -1,0 +1,18 @@
+--style=allman
+--indent-spaces=4
+--attach-closing-while
+--indent-switches
+--indent-namespaces
+--indent-preproc-define
+--min-conditional-indent=0
+--break-blocks
+
+--pad-oper
+--pad-comma
+# I am considering going to this
+#--pad-paren
+
+--keep-one-line-blocks
+--break-after-logical
+
+--convert-tabs

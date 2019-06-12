@@ -1,0 +1,19 @@
+list installed packages:
+
+dpkg-query -l 
+
+
+list files installed by package:
+
+dpkg-query -L <package-name>
+
+
+list the files a.deb package will install:
+
+dpkg-deb -c <package-name.deb>
+
+
+Show fortune by moose | tux | koala:
+
+gsettings set com.linumint.terminal show-fortunes true
+

@@ -1,0 +1,27 @@
+git config --global user.name 'Lee Brinton'
+git config --global usr.email leebrinton@gmail.com
+
+# set github user name 
+git config --global user.username leebrinton
+
+git config --global core.editor vim
+git config --global merge.tool vimdiff
+or
+git config --global merge.tool meld
+on windows maybe setup winmerge as a custom tool
+
+git clone git://github.com/leebrinton/python
+
+mkdir <new repo>
+cd <new repo>
+git init
+git add <file>
+git commit -m <message>
+
+
+create <repo> on github.
+git remote add origin https://github.com/leebrinton/<repo>.git
+git push -u origin master 
+
+git clone https://github.com/leebrinton/<repo>
+

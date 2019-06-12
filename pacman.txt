@@ -1,0 +1,47 @@
+# List all available packages #
+pacman -S -l
+
+# List all installed packages #
+pacman -Q
+
+# Search for package #
+pacman -S -s <package>
+
+# Show info about package #
+pacman -S -i <package>
+
+# Install package #
+pacman -S <package>
+
+# Refresh / Synchronize the package Databases and upgrade #
+pacman -Syu
+
+# Find out of date packages #
+pacman -Q -u
+
+# List package contents #
+pacman -Q -l
+
+# Check the health of installed packages #
+pacman -Q -k
+
+# View packages installed as dependencies #
+pacman -Q -d
+
+# Show orphaned dependencies #
+pacman -Q -d -t
+
+# Show explicitly installed packages #
+pacman -Q -e
+
+# Show which group packages belong to #
+pacman -Q -g
+
+# Show members of a group #
+pacman -Q -g <group>
+
+# Show info about installed package #
+packman -Q -i <package>
+
+# Groups
+base base-devel mingw-w64-x86_64-toolchain mingw-w64-i686-toolchain VCS

@@ -1,0 +1,9 @@
+set hlsearch
+set ignorecase
+set incsearch
+set matchpairs
+set showmode
+set smartcase
+
+imap <C-n> <ESC>:action HippieCompletion<CR>a
+imap <C-p> <ESC>:action HippieBackwardCompletion<CR>a

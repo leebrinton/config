@@ -1,0 +1,10 @@
+install Mercurical SCM
+
+mkdir ~/go
+export GOPATH="${HOME}/go"
+
+CURSES:
+go get code.google.com/p/goncurses
+   (For msys need to
+    place the goncurses/pdcurses/curses.h in /usr/local/include and
+    copy /usr/local/lib/libcurses.a to /usr/local/lib/libpdcurses.a)

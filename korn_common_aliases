@@ -48,6 +48,7 @@ case $(uname) in
 esac
 
 alias ed='ed -p\*'
+alias myip='curl icanhazip.com'
 
 ###############################################################################
 # end of korn_common_aliases

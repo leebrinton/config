@@ -1690,6 +1690,8 @@ endif
 
 Plug 'leafgarland/typescript-vim'
 
+Plug 'martinda/Jenkinsfile-vim-syntax'
+
 " HTML
 Plug 'mattn/emmet-vim', { 'for': ['html','markdown'] }
 

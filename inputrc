@@ -41,6 +41,9 @@ set visible-stats on
 "\eOH": beginning-of-line
 "\eOF": end-of-line
 
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+
 $if mode=emacs
   # Common to Console & RXVT
   "\C-?": backward-kill-line         # Ctrl-BackSpace

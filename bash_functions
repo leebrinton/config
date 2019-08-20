@@ -4,6 +4,14 @@
 #
 ###############################################################################
 #---------------------------------------------------------------------------
+# git_branch - show the currently checkedout git branch
+#---------------------------------------------------------------------------
+function git_branch() {
+  #git status 2>/dev/null | egrep '^On branch ' | awk '{print $3}'
+  git branch 2>/dev/null | egrep '^\* ' | sed 's/^\* //'
+}
+
+#---------------------------------------------------------------------------
 # settitle - set terminal window title
 #---------------------------------------------------------------------------
 function settitle () {
@@ -266,6 +274,31 @@ function cd() {
 function lines() {
     wc -l $@
 }
+
+#------------------------------------------------------------------------------
+# showme
+# Display info 
+#------------------------------------------------------------------------------
+function showme() {
+  local freemem
+
+  if [ "$RUNNING_DARWIN" = 'true' ]
+  then
+    freemem=$(top -l 1 -s 0 | grep PhysMem)
+  else
+    freemem=$(free)
+  fi
+
+  echo 'OS: '
+  uname -a
+  echo -e "\nUptime: "
+  uptime
+  echo -e "\nMemory: "
+  echo "${freemem}"
+  echo -e "\nWAN IP: "
+  curl -s icanhazip.com 
+}
+
 ###############################################################################
 #
 # winfuncs: Win32 and DOS integration functions for bash on Gnu-Win32

@@ -240,7 +240,7 @@ export HISTCONTROL HISTFILE HISTFILESIZE
 # Set the main prompt variable 
 #------------------------------------------------------------------------------
  [[ "$RUNNING_MSYS2_BASED_ENV" != 'true' ]] && \
-  PS1='\[${greenf}\]\u@\h \[${yellowf}\]\w \[${cyanf}\]\D{%a %b %d %I:%M:%S}\[${reset}\] (\!)\n\$ '
+     PS1='\[${greenf}\]\u@\h \[${yellowf}\]\w \[${cyanf}\]\D{%a %b %d %I:%M:%S} \[${purplef}\]$(git_branch)\[${reset}\] (\!)\n\$ '
 
 #------------------------------------------------------------------------------
 # Set the PROMPT_COMMAND variable 

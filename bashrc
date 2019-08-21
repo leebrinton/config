@@ -239,8 +239,62 @@ export HISTCONTROL HISTFILE HISTFILESIZE
 #------------------------------------------------------------------------------
 # Set the main prompt variable 
 #------------------------------------------------------------------------------
+git_prompt_cmd='git_branch'
+
+if [[ -f /opt/local/share/git/git-prompt.sh ]]
+then
+    source /opt/local/share/git/git-prompt.sh
+    export GIT_PS1_SHOWDIRTYSTATE=1
+    export GIT_PS1_SHOWSTASHSTATE=1
+    export GIT_PS1_SHOWUNTRACKEDFILES=1
+    # If you would like to see the difference between HEAD and its upstream,
+    # set GIT_PS1_SHOWUPSTREAM="auto".  A "<" indicates you are behind, ">"
+    # indicates you are ahead, "<>" indicates you have diverged and "="
+    # indicates that there is no difference. You can further control
+    # behaviour by setting GIT_PS1_SHOWUPSTREAM to a space-separated list
+    # of values:
+    #
+    #     verbose       show number of commits ahead/behind (+/-) upstream
+    #     name          if verbose, then also show the upstream abbrev name
+    #     legacy        don't use the '--count' option available in recent
+    #                   versions of git-rev-list
+    #     git           always compare HEAD to @{upstream}
+    #     svn           always compare HEAD to your SVN upstream
+    #
+    # Once you have set GIT_PS1_SHOWUPSTREAM, you can override it on a
+    # per-repository basis by setting the bash.showUpstream config variable.
+    export GIT_PS1_SHOWUPSTREAM='auto'
+
+    # If you would like to see more information about the identity of
+    # commits checked out as a detached HEAD, set GIT_PS1_DESCRIBE_STYLE
+    # to one of these values:
+    #
+    #     contains      relative to newer annotated tag (v1.6.3.2~35)
+    #     branch        relative to newer tag or branch (master~4)
+    #     describe      relative to older annotated tag (v1.6.3.1-13-gdd42c2f)
+    #     tag           relative to any older tag (v1.6.3.1-13-gdd42c2f)
+    #     default       exactly matching tag
+    export GIT_PS1_DESCRIBE_STYLE='branch'
+
+    # If you would like a colored hint about the current dirty state, set
+    # GIT_PS1_SHOWCOLORHINTS to a nonempty value. The colors are based on
+    # the colored output of "git status -sb" and are available only when
+    # using __git_ps1 for PROMPT_COMMAND or precmd.
+    # export GIT_PS1_SHOWCOLORHINTS=1
+
+    # If you would like __git_ps1 to do nothing in the case when the current
+    # directory is set up to be ignored by git, then set
+    # GIT_PS1_HIDE_IF_PWD_IGNORED to a nonempty value. Override this on the
+    # repository level by setting bash.hideIfPwdIgnored to "false".
+    # export GIT_PS1_HIDE_IF_PWD_IGNORED=1
+
+    git_prompt_cmd='__git_ps1 "(%s)"'
+fi
+
  [[ "$RUNNING_MSYS2_BASED_ENV" != 'true' ]] && \
-     PS1='\[${greenf}\]\u@\h \[${yellowf}\]\w \[${cyanf}\]\D{%a %b %d %I:%M:%S} \[${purplef}\]$(git_branch)\[${reset}\] (\!)\n\$ '
+     PS1='\[${greenf}\]\u@\h \[${yellowf}\]\w \[${purplef}\]$(eval $git_prompt_cmd)\[${reset}\] (\!)\n\$ '
+     
+#     PS1='\[${greenf}\]\u@\h \[${yellowf}\]\w \[${cyanf}\]\D{%a %b %d %I:%M:%S} \[${purplef}\]$(eval $git_prompt_cmd)\[${reset}\] (\!)\n\$ '
 
 #------------------------------------------------------------------------------
 # Set the PROMPT_COMMAND variable 
@@ -285,6 +339,11 @@ then
 elif [[ -f /opt/local/etc/bash_completion ]]
 then
   BASH_COMPLETION=/opt/local/etc/bash_completion
+fi
+
+if [[ -f /opt/local/share/git/completion/git-completion.bash ]]
+then
+    source /opt/local/share/git/completion/git-completion.bash
 fi
 
 # If this shell is interactive, turn on programmable completion enhancements.
